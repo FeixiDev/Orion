@@ -7,6 +7,7 @@ from execute.linstor_api import LinstorAPI
 import utils
 import sys
 import sundry as s
+import math
 
 
 def size_conversion(size_str):
@@ -314,10 +315,10 @@ class ClusterLVM(object):
         """
         real_size = 0
         if type == "vg":
-            real_size = real_size + int(self.get_vg_free_pe(data)) * 4
+            real_size = real_size + int(self.get_vg_free_pe(data)) * 4 - (math.ceil((int(self.get_vg_free_pe(data)) * 4) / 4096) * 8)
         if type == "device":
             real_size = self.get_device_size(data)
-            real_size = real_size - 4
+            real_size = real_size - 4 - (math.ceil(real_size / 4096) * 8)
         available_size = real_size - 4
         if available_size <= 0:
             s.prt_log("No available space.", 2)
