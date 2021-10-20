@@ -4,7 +4,7 @@ import log
 import sundry
 from replay import Replay
 
-# sys.path.append('../')
+sys.path.append('../')
 
 
 # transaction_id = log.create_transaction_id()
