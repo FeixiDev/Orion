@@ -2,6 +2,7 @@
 import time
 import copy
 import traceback
+import execute
 
 import iscsi_json
 import sundry as s
@@ -1384,7 +1385,7 @@ class LogicalUnit():
 
         # 执行
         try:
-            ISCSILogicalUnit().create(name,target_iqn,lunid,path," ".join(initiator_iqns))
+            ISCSILogicalUnit().create(name,disk,target_iqn,lunid,path," ".join(initiator_iqns))
             Colocation().create(f'col_{name}', name, target) # 这里的name，是指disk，还是logicalunit？
             Order().create(f'or_{name}', target, name)
             Order().create(f'or_{name}_prtblk_off', name, f'{portal}_prtblk_off')
@@ -1432,7 +1433,11 @@ class LogicalUnit():
                 s.prt_log('Delete canceled', 2)
 
         # 执行
-        ISCSILogicalUnit().delete(name)
+        try:
+            ISCSILogicalUnit().delete(name)
+        except Exception as ex:
+            s.prt_log('出现异常，请检查',1)
+            return
 
         # 验证
         if not CRMConfig().get_crm_res_status(name,'iSCSILogicalUnit'):
@@ -1479,7 +1484,7 @@ class LogicalUnit():
                 s.prt_log(f'{host} is already on the "allowed initiators"', 1)
                 return
             initiators_add.append(initiator)
-
+        
         initiators = self.js.json_data['LogicalUnit'][logicalunit]['initiators']
         initiators.extend(initiators_add)
         ISCSILogicalUnit().modify_initiators(logicalunit,initiators)
@@ -1541,6 +1546,7 @@ class LogicalUnit():
             s.prt_log(msg, 1)
         else:
             s.prt_log(f'{name} has been started', 0)
+
 
 
     def stop(self, name):
