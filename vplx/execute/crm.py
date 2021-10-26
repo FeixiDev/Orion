@@ -263,7 +263,7 @@ class CRMData():
     def get_iscsi_logical_unit(self):
         # ilu : iscsi logical unit
         re_ilu = re.compile(
-            r'primitive\s(\S+)\siSCSILogicalUnit.*\s*params\starget_iqn="(\S+)"\s.*?lun=(\d+)\spath="(\S+)"\sallowed_initiators="(.*?)"')
+            r'primitive\s(\S+)\siSCSILogicalUnit.*\s*params\starget_iqn="(\S+)"\s.*?lun=(\d+)\spath="(\S+)"\sallowed_initiators="?(.*?)"?\s\\')
         result = s.re_findall(re_ilu, self.crm_conf_data)
         dict_ilu = {}
         for ilu in result:
@@ -589,7 +589,7 @@ class CRMConfig():
             return True
         else:
             output = result['rst']
-            re_str = re.compile(rf'INFO: hanging colocation:.*? deleted\nINFO: hanging order:.*? deleted\n')
+            re_str = re.compile(rf'INFO: hanging colocation:.*? deleted')
             if s.re_search(re_str, output):
                 s.prt_log(f"Delete {res} success(including colocation and order)", 0)
                 return True
@@ -830,8 +830,8 @@ class ISCSILogicalUnit():
 
 
     # @RollBack
-    def create(self, name, target_iqn, lunid, path, initiator):
-        cmd = f'crm conf primitive {name} iSCSILogicalUnit params ' \
+    def create(self, lun_name, drbd_name, target_iqn, lunid, path, initiator):
+        cmd = f'crm conf primitive {lun_name} iSCSILogicalUnit params ' \
             f'target_iqn="{target_iqn}" ' \
             f'implementation=lio-t ' \
             f'lun={lunid} ' \
@@ -841,8 +841,12 @@ class ISCSILogicalUnit():
             f'op stop timeout=40 interval=0 ' \
             f'op monitor timeout=40 interval=15 ' \
             f'meta target-role=Stopped'
+        cmd_location = f'crm config location lo_iscsi_{lun_name} {lun_name} rule -inf: not_defined drbd-promotion-score-{drbd_name} rule drbd-promotion-score-{drbd_name}: defined drbd-promotion-score-{drbd_name}'
+
         result = execute_crm_cmd(cmd)
-        if result['sts']:
+        result_location = execute_crm_cmd(cmd_location)
+
+        if result['sts'] and result_location['sts']:
             # s.prt_log(f"Create iSCSILogicalUnit:{name} successfully",0)
             return True
         else:
@@ -892,9 +896,10 @@ class ISCSILogicalUnit():
         target_iqn = self.js.json_data['Target'][target]['target_iqn']
         portal = self.js.json_data['Target'][target]['portal']
 
+        drbd_name = name[4:]
         try:
             # 执行iscsilogicalunit创建
-            self.create(name,target_iqn,lunid,path,initiator)
+            self.create(name,drbd_name,target_iqn,lunid,path,initiator)
             self.list_res_created.append(name)
 
             #Colocation和Order创建
@@ -919,4 +924,5 @@ class ISCSILogicalUnit():
 
         # 验证？
         return True
+
 
