@@ -208,13 +208,15 @@ class LVMCommands():
                         sys.exit()
                     else:
                         vg_name = args.vg
-                        size = lvm_operation.check_and_get_size(args.vg, args.size, "vg")
+                        if args.size:
+                            size = lvm_operation.check_and_get_size(args.vg, args.size, "vg")
                 else:
                     print("Please select the available vg.")
                     sys.exit()
             elif args.device:
                 if lvm_operation.check_pv_exit(args.device):
-                    size = lvm_operation.check_and_get_size(args.device, args.size, "device")
+                    if args.size:
+                        size = lvm_operation.check_and_get_size(args.device, args.size, "device")
                     for pv in args.device:
                         lvm_operation.create_pv(pv)
                     vg_name = f'vvg_{args.name}_{random.randint(0, 10)}'
@@ -227,8 +229,11 @@ class LVMCommands():
             else:
                 print("The following arguments are required:  -d DEVICE [DEVICE ...] / -vg VG")
                 sys.exit()
-            size = f"{size}M"
-            lvm_operation.create_thinpool(args.name, size, vg_name)
+            if args.size:
+                size = f"{size}M"
+                lvm_operation.create_thinpool(args.name, size, vg_name)
+            else:
+                lvm_operation.create_thinpool_by_free_vg(args.name, vg_name)
 
     @sd.deco_record_exception
     def delete(self, args):

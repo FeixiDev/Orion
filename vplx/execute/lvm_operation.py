@@ -169,6 +169,11 @@ class ClusterLVM(object):
             s.prt_log(f"Failed to create Thinpool {name}", 1)
             return False
 
+    def create_thinpool_by_free_vg(self, name, vg):
+        """使用当前VG的全部剩余空间创建thinpool"""
+        create_cmd = f'lvcreate -l +100%free --thinpool {name} {vg} -y'
+        utils.exec_cmd(create_cmd, self.conn)
+
     def create_thinlv(self, name, size, vg, thinpool):
         """创建thinlv"""
         cmd = f"lvcreate -V {size} -n {name} {vg}/{thinpool} -y"
@@ -315,7 +320,8 @@ class ClusterLVM(object):
         """
         real_size = 0
         if type == "vg":
-            real_size = real_size + int(self.get_vg_free_pe(data)) * 4 - (math.ceil((int(self.get_vg_free_pe(data)) * 4) / 4096) * 8)
+            real_size = real_size + int(self.get_vg_free_pe(data)) * 4 - (
+                    math.ceil((int(self.get_vg_free_pe(data)) * 4) / 4096) * 8)
         if type == "device":
             real_size = self.get_device_size(data)
             real_size = real_size - 4 - (math.ceil(real_size / 4096) * 8)
