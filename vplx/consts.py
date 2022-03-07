@@ -2,7 +2,7 @@
 """
 Global constants for vtel
 """
-VERSION = 'v1.5.2-RC'
+VERSION = 'v1.5.3-RC'
 
 
 class ExitCode(object):
