@@ -7,7 +7,8 @@ import execute
 import iscsi_json
 import sundry as s
 from execute.linstor_api import LinstorAPI
-from execute.crm import RollBack,CRMData, CRMConfig,IPaddr2,PortBlockGroup,Colocation,Order,ISCSITarget,ISCSILogicalUnit
+from execute.crm import RollBack, CRMData, CRMConfig, IPaddr2, PortBlockGroup, Colocation, Order, ISCSITarget, \
+    ISCSILogicalUnit
 import log
 import consts
 
@@ -76,21 +77,20 @@ class IscsiConfig():
     def show_info(self):
         nl = '\n'
         info = []
-        if not any([self.create,self.delete,self.modify]):
+        if not any([self.create, self.delete, self.modify]):
             return ['Will not have any effect']
         if self.create:
-            info_create = f'''create:\n{''.join([f"{disk}'s iqn ==> {','.join(iqn)}{nl}" for disk,iqn in self.create.items()])}'''
+            info_create = f'''create:\n{''.join([f"{disk}'s iqn ==> {','.join(iqn)}{nl}" for disk, iqn in self.create.items()])}'''
             info.append(info_create)
         if self.delete:
             info_delete = f'delete:\n{",".join(self.delete)}'
             info.append(info_delete)
         if self.modify:
-            info_modify = f'''modify:\n{''.join([f"{disk}'s iqn ==> {','.join(iqn)}{nl}" for disk,iqn in self.modify.items()])}'''
+            info_modify = f'''modify:\n{''.join([f"{disk}'s iqn ==> {','.join(iqn)}{nl}" for disk, iqn in self.modify.items()])}'''
             info.append(info_modify)
         return info
 
-
-    def create_iscsilogicalunit(self,target):
+    def create_iscsilogicalunit(self, target):
         for disk, iqn in self.create.items():
             self.recovery_list['delete'].add(disk)
             self.obj_iscsiLU.create_mapping(disk, target, iqn)
@@ -104,7 +104,6 @@ class IscsiConfig():
         for disk, iqn in self.modify.items():
             self.recovery_list['modify'].update({disk: self.recover['modify'][disk]})
             self.obj_iscsiLU.modify_initiators(disk, iqn)
-
 
     # 回滚功能，暂不调用
     def rollback(self):
@@ -126,17 +125,17 @@ class IscsiConfig():
         if not answer in ['y', 'yes', 'Y', 'YES']:
             s.prt_log(f'Cancel operation', 2)
 
-    def crm_conf_change(self,target=None):
+    def crm_conf_change(self, target=None):
         try:
             self.create_iscsilogicalunit(target)
             self.delete_iscsilogicalunit()
             self.modify_iscsilogicalunit()
         except consts.CmdError:
-            s.prt_log('Command execution failed',1)
+            s.prt_log('Command execution failed', 1)
             self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
             # self.rollback()
         except Exception:
-            s.prt_log('Unknown exception',1)
+            s.prt_log('Unknown exception', 1)
             self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
             # self.rollback()
 
@@ -189,13 +188,11 @@ class Host():
     def __init__(self):
         self.js = iscsi_json.JsonOperation()
 
-
-
     def _get_all_targetIqn(self):
         data = self.js.json_data['Target']
         return [x['target_iqn'] for x in data.values()]
 
-    def _check_iqn_availability(self,iqn):
+    def _check_iqn_availability(self, iqn):
         data = self.js.json_data['Host']
         if not iqn in [x for x in data.values()]:
             return True
@@ -219,7 +216,7 @@ class Host():
             return
 
         if not self._check_iqn_availability(iqn):
-            s.prt_log(f"The iqn has been used",1)
+            s.prt_log(f"The iqn has been used", 1)
             return
 
         self.js.update_data("Host", host, iqn)
@@ -243,9 +240,8 @@ class Host():
         s.prt_log(table, 0)
         return list_data
 
-
     def delete(self, host):
-        if not self.js.check_key('Host',host):
+        if not self.js.check_key('Host', host):
             s.prt_log(f"Fail！Can't find {host}", 1)
             return
 
@@ -274,9 +270,8 @@ class Host():
             return
 
         if not self._check_iqn_availability(iqn):
-            s.prt_log(f"The iqn has been used",1)
+            s.prt_log(f"The iqn has been used", 1)
             return
-
 
         json_data_before = copy.deepcopy(self.js.json_data)
         self.js.update_data('Host', host, iqn)
@@ -337,7 +332,6 @@ class DiskGroup():
         s.prt_log(table, 0)
         return list_data
 
-
     def delete(self, dg):
         if not self.js.check_key('DiskGroup', dg):
             s.prt_log(f"Fail! Can't find {dg}", 1)
@@ -391,7 +385,6 @@ class DiskGroup():
             if not disk in self.js.json_data['DiskGroup'][dg]:
                 s.prt_log(f'{disk} does not exist in {dg} and cannot be removed', 1)
                 return
-
 
         json_data_before = copy.deepcopy(self.js.json_data)
         self.js.remove_member('DiskGroup', dg, list_disk)
@@ -453,7 +446,6 @@ class HostGroup():
         s.prt_log(table, 0)
         return list_data
 
-
     def delete(self, hg):
         if not self.js.check_key('HostGroup', hg):
             s.prt_log(f"Fail! Can't find {hg}", 1)
@@ -513,7 +505,7 @@ class HostGroup():
         self.js.remove_member('HostGroup', hg, list_host)
         if not self.js.json_data['HostGroup'][hg]:
             self.js.delete_data('HostGroup', hg)
-            self.js.arrange_data('HostGroup',hg)
+            self.js.arrange_data('HostGroup', hg)
             print(f'{hg} and the map related to {hg} have been modified/deleted')
         obj_iscsi = IscsiConfig(json_data_before, self.js.json_data)
         obj_iscsi.comfirm_modify()
@@ -541,7 +533,6 @@ class Map():
 
         # 用于收集创建成功的resource
         # self.target_name, self.target_iqn = self.get_target()
-
 
     def create(self, map, target, list_hg, list_dg):
         """
@@ -575,7 +566,8 @@ class Map():
         # 已经被使用过的disk(ilu)需不需要提示
         dict_disk_inuse = obj_iscsi.modify
         if dict_disk_inuse:
-            s.prt_log(f"Disk:{','.join(dict_disk_inuse.keys())} has been mapped,will modify their allowed initiators",0)
+            s.prt_log(f"Disk:{','.join(dict_disk_inuse.keys())} has been mapped,will modify their allowed initiators",
+                      0)
 
         obj_iscsi.create_iscsilogicalunit(target)
         obj_iscsi.modify_iscsilogicalunit()
@@ -601,7 +593,6 @@ class Map():
         table = s.make_table(list_header, list_data)
         s.prt_log(table, 0)
         return list_data
-
 
     #  执行map展示的时候，会展示对应dg和hg的数据（全部三个表格），暂时保留代码
     # def get_spe_map(self, map):
@@ -781,13 +772,13 @@ class Portal():
             s.prt_log(f'{port} does not meet specifications(Range：3260-65535)', 1)
             return
         if not self._check_netmask(netmask):
-            s.prt_log(f'{netmask} does not meet specifications(Range：1-32)',1)
+            s.prt_log(f'{netmask} does not meet specifications(Range：1-32)', 1)
             return
         if self.js.check_key('Portal', name):
             s.prt_log(f'{name} already exists, please use another name', 1)
             return
-        if self.js.check_in_res('Portal','ip',ip):
-            s.prt_log(f'{ip} is already in use, please use another IP',1)
+        if self.js.check_in_res('Portal', 'ip', ip):
+            s.prt_log(f'{ip} is already in use, please use another IP', 1)
             return
 
         try:
@@ -803,21 +794,22 @@ class Portal():
             Order.create(f'or_{name}_prtblk_on', f'{name}_prtblk_on', name)
         except Exception as ex:
             self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
-            RollBack.rollback('portal', ip,port,netmask)
+            RollBack.rollback('portal', ip, port, netmask)
             return
 
         # 验证
         status = self._check_status(name)
 
         if status == 'OK':
-            self.js.update_data('Portal', name, {'ip': ip, 'port': str(port),'netmask':str(netmask),'target':[]})
+            self.js.update_data('Portal', name, {'ip': ip, 'port': str(port), 'netmask': str(netmask), 'target': []})
             self.js.commit_data()
         elif status == 'NETWORK_ERROR':
             obj_ipadrr.delete(name)
             obj_portblock.delete(f'{name}_prtblk_on')
             obj_portblock.delete(f'{name}_prtblk_off')
-            s.prt_log('The portal cannot be created normally due to the wrong IP address network segment or other network problems, please reconfigure', 1)
-
+            s.prt_log(
+                'The portal cannot be created normally due to the wrong IP address network segment or other network problems, please reconfigure',
+                1)
 
     def delete(self, name):
         if not self.js.check_key('Portal', name):
@@ -851,15 +843,14 @@ class Portal():
         crm_data = CRMData()
         dict = crm_data.get_vip()
         if not name in dict.keys():
-            self.js.delete_data('Portal',name)
+            self.js.delete_data('Portal', name)
             self.js.commit_data()
             print(f'Delete {name} successfully')
         else:
             print(f'Failed to delete {name}, please check')
 
-
-    def modify(self, name, ip, port ,netmask):
-        if not self.js.check_key('Portal',name):
+    def modify(self, name, ip, port, netmask):
+        if not self.js.check_key('Portal', name):
             s.prt_log(f"Fail！Can't find {name}", 1)
             return
         flag_only_netmask = True
@@ -868,7 +859,7 @@ class Portal():
         # 指定了ip
         if ip:
             if not self._check_IP(ip):
-                s.prt_log(f'{ip} does not meet specifications',1)
+                s.prt_log(f'{ip} does not meet specifications', 1)
                 return
             if self.js.check_in_res('Portal', 'ip', ip):
                 s.prt_log(f'{ip} is already in use, please use another IP', 1)
@@ -880,7 +871,7 @@ class Portal():
         # 指定了port
         if port:
             if not self._check_port(port):
-                s.prt_log(f'{port} does not meet specifications(Range：3260-65535)',1)
+                s.prt_log(f'{port} does not meet specifications(Range：3260-65535)', 1)
                 return
             flag_only_netmask = False
         else:
@@ -893,7 +884,7 @@ class Portal():
             netmask = portal['netmask']
 
         if portal['ip'] == ip and portal['port'] == str(port) and portal['netmask'] == str(netmask):
-            s.prt_log(f'The parameters are the same, no need to modify',1)
+            s.prt_log(f'The parameters are the same, no need to modify', 1)
             return
 
         if flag_only_netmask:
@@ -907,13 +898,14 @@ class Portal():
                 obj_portblock.modify(f'{name}_prtblk_off', ip, port)
             except Exception as ex:
                 self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
-                RollBack.rollback('portal', portal['ip'],portal['port'],portal['netmask'])
+                RollBack.rollback('portal', portal['ip'], portal['port'], portal['netmask'])
                 return
 
         else:
             if portal['target']:
                 # 反馈修改影响
-                print(f'Target：{",".join(portal["target"])}using this portal.These targets will be modified synchronously, whether to continue?y/n')
+                print(
+                    f'Target：{",".join(portal["target"])}using this portal.These targets will be modified synchronously, whether to continue?y/n')
                 answer = s.get_answer()
                 if not answer in ['y', 'yes', 'Y', 'YES']:
                     s.prt_log('Modify canceled', 2)
@@ -958,8 +950,7 @@ class Portal():
             self.js.json_data['Target'][target]['ip'] = ip
             self.js.json_data['Target'][target]['port'] = str(port)
         self.js.commit_data()
-        s.prt_log(f'Modify {name} successfully',0)
-
+        s.prt_log(f'Modify {name} successfully', 0)
 
     def show(self):
         """
@@ -976,7 +967,6 @@ class Portal():
         table = s.make_table(list_header, list_data)
         s.prt_log(table, 0)
         return list_data
-
 
     def _check_name(self, name):
         result = s.re_search(r'^[a-zA-Z][a-zA-Z0-9_]*$', name)
@@ -1029,13 +1019,11 @@ class Target():
         self.logger = log.Log()
         self.js = iscsi_json.JsonOperation()
 
-
     def _get_all_targetIqn(self):
         data = self.js.json_data['Target']
         return [x['target_iqn'] for x in data.values()]
 
-
-    def create(self,name, iqn, portal):
+    def create(self, name, iqn, portal):
         # 前置判断
         if not self._check_name(name):
             s.prt_log(f'Wrong name:{name}. It must start with a letter and consist of letters, numbers, and "_" ', 1)
@@ -1045,13 +1033,13 @@ class Target():
             return
 
         if name in self.js.get_all_primitive_name():
-            s.prt_log(f'This name is already in use, please use another name',1)
+            s.prt_log(f'This name is already in use, please use another name', 1)
             return
 
         # if self.js.check_key('Target', name):
         #     s.prt_log(f'{name} already exists, please use another name', 1)
         #     return
-        if not self.js.check_key('Portal',portal):
+        if not self.js.check_key('Portal', portal):
             s.prt_log(f'{portal} does not exist, please use the existing portal', 1)
             return
 
@@ -1066,8 +1054,8 @@ class Target():
         port = dict_portal['port']
 
         try:
-            ISCSITarget().create(name,iqn,ip,port)
-            Order.create(f'or_{name}_{portal}',portal, name)
+            ISCSITarget().create(name, iqn, ip, port)
+            Order.create(f'or_{name}_{portal}', portal, name)
             Colocation.create(f'col_{name}_{portal}', name, portal)
             # raise TypeError
         except Exception as ex:
@@ -1081,13 +1069,12 @@ class Target():
         # 验证
         status = self._check_status(name)
         if status == 'OK':
-            self.js.update_data('Target', name, {'target_iqn': iqn, 'portal':portal,'lun':[]})
+            self.js.update_data('Target', name, {'target_iqn': iqn, 'portal': portal, 'lun': []})
             self.js.json_data['Portal'][portal]['target'].append(name)
             self.js.commit_data()
 
-
     def modify(self, name, iqn, portal):
-        if not self.js.check_key('Target',name):
+        if not self.js.check_key('Target', name):
             s.prt_log(f"Fail！Can't find {name}", 1)
             return
         if iqn:
@@ -1099,28 +1086,26 @@ class Target():
                 s.prt_log(f'The iqn:"{iqn}" has been used', 1)
                 return
 
-
         if portal:
             if portal == self.js.json_data['Target'][name]['portal']:
                 s.prt_log(f'Same as the portal used, please specify another one', 1)
                 return
-            if not self.js.check_key('Portal',portal):
+            if not self.js.check_key('Portal', portal):
                 s.prt_log(f"Fail！Can't find {portal}", 1)
                 return
 
         dict_target = self.js.json_data['Target'][name]
 
-
         if portal == dict_target['portal'] and iqn == dict_target['target_iqn']:
-            s.prt_log(f'The parameters are the same, no need to modify',1)
+            s.prt_log(f'The parameters are the same, no need to modify', 1)
             return
 
         if dict_target['lun']:
-            print(f'luns：{",".join(dict_target["lun"])}using this target.These luns will be suspended , whether to continue?y/n')
+            print(
+                f'luns：{",".join(dict_target["lun"])}using this target.These luns will be suspended , whether to continue?y/n')
             answer = s.get_answer()
             if not answer in ['y', 'yes', 'Y', 'YES']:
                 s.prt_log('Modify canceled', 2)
-
 
         obj_target = ISCSITarget()
         if iqn and iqn != dict_target['target_iqn']:
@@ -1128,7 +1113,7 @@ class Target():
                 obj_target.modify_iqn(name, iqn)
             except Exception as ex:
                 self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
-                RollBack.rollback('target','','',iqn)
+                RollBack.rollback('target', '', '', iqn)
                 return
         if portal and portal != dict_target['portal']:
             dict_portal = self.js.json_data['Portal'][portal]
@@ -1140,7 +1125,7 @@ class Target():
                 Colocation.create(f'col_{name}_{portal}', name, portal)
             except Exception as ex:
                 self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
-                RollBack.rollback('target',dict_portal['ip'],dict_portal['port'],'')
+                RollBack.rollback('target', dict_portal['ip'], dict_portal['port'], '')
                 Order.delete(f'or_{name}_{portal}')
                 Colocation.delete(f'col_{name}_{portal}')
                 Order.create(f'or_{name}_{dict_target["portal"]}', dict_target['portal'], name)
@@ -1152,7 +1137,7 @@ class Target():
             for lun in dict_target['lun']:
                 # 修改这些lun的target_iqn
                 try:
-                    ISCSILogicalUnit().modify_target_iqn(lun,iqn)
+                    ISCSILogicalUnit().modify_target_iqn(lun, iqn)
                 except Exception as ex:
                     self.logger.write_to_log('DATA', 'DEBUG', 'exception', 'Rollback', str(traceback.format_exc()))
                     # 回滚待设置
@@ -1174,17 +1159,15 @@ class Target():
                 json_data_portal[json_data_target['portal']]['target'].remove(name)
                 json_data_target['portal'] = portal
 
-        self.js.cover_data('Portal',json_data_portal)
+        self.js.cover_data('Portal', json_data_portal)
         self.js.update_data('Target', name, json_data_target)
         self.js.commit_data()
         s.prt_log(f'Modify {name} successfully', 0)
-
 
     def delete(self, name):
         if not self.js.check_key('Target', name):
             s.prt_log(f"Fail！Can't find {name}", 1)
             return
-
 
         dict_target = self.js.json_data['Target'][name]
         lun = dict_target['lun']
@@ -1205,7 +1188,7 @@ class Target():
             return
 
         # 验证
-        if not CRMConfig().get_crm_res_status(name,'iSCSITarget'):
+        if not CRMConfig().get_crm_res_status(name, 'iSCSITarget'):
             portal = self.js.json_data['Target'][name]['portal']
             self.js.json_data['Portal'][portal]['target'].remove(name)
             self.js.delete_data('Target', name)
@@ -1213,7 +1196,6 @@ class Target():
             print(f'Delete target:{name} successfully')
         else:
             print(f'Failed to delete target:{name}, please check')
-
 
     def show(self):
         """
@@ -1226,7 +1208,7 @@ class Target():
         dict_target = self.js.json_data['Target']
         dict_portal = self.js.json_data['Portal']
         for target, data in dict_target.items():
-            status = CRMConfig().get_crm_res_status(target,'iSCSITarget')
+            status = CRMConfig().get_crm_res_status(target, 'iSCSITarget')
             # 这里再决定好配置文件是否需要修改之后再进行具体的开发
             list_data.append([target, data['target_iqn'], data['portal'], status, ",".join(data['lun'])])
 
@@ -1234,8 +1216,7 @@ class Target():
         s.prt_log(table, 0)
         return list_data
 
-
-    def start(self,name):
+    def start(self, name):
         # 前置判断
         if not self.js.check_key('Target', name):
             s.prt_log(f'{name} does not exist', 1)
@@ -1250,7 +1231,6 @@ class Target():
             s.prt_log(f'{name} A is in FAILED state', 1)
             return
 
-
         # 执行
         crm_config.start_res(name)
 
@@ -1258,13 +1238,12 @@ class Target():
         target = self.js.json_data['Target'][name]
         try:
             # 这里在设置的timeout内来监控状态，并且设置也还没有考虑luns
-            crm_config.monitor_status_by_time(name,'iSCSITarget','Started',20)
-            crm_config.monitor_status_by_time(f'{target["portal"]}_prtblk_off','portblock','Started',60)
+            crm_config.monitor_status_by_time(name, 'iSCSITarget', 'Started', 20)
+            crm_config.monitor_status_by_time(f'{target["portal"]}_prtblk_off', 'portblock', 'Started', 60)
         except TimeoutError as msg:
             s.prt_log(msg, 1)
         else:
             s.prt_log(f'{name} has been started', 0)
-
 
     def stop(self, name):
         # 前置判断
@@ -1286,18 +1265,17 @@ class Target():
             if not answer in ['y', 'yes', 'Y', 'YES']:
                 s.prt_log('already cancelled', 2)
 
-        s.prt_log('Trying to stop',0)
+        s.prt_log('Trying to stop', 0)
         # 执行
         crm_config.stop_res(name)
 
-        #验证,验证的时间跟这个target被多少资源使用有关系，越多资源使用，需要的时间越多，暂时没有做特殊处理（比如通过判断被多少资源使用，动态赋予timeout的数值）
+        # 验证,验证的时间跟这个target被多少资源使用有关系，越多资源使用，需要的时间越多，暂时没有做特殊处理（比如通过判断被多少资源使用，动态赋予timeout的数值）
         try:
-            crm_config.monitor_status_by_time(name,'iSCSITarget','Stopped (disabled)',timeout=60)
+            crm_config.monitor_status_by_time(name, 'iSCSITarget', 'Stopped (disabled)', timeout=60)
         except TimeoutError as msg:
-            s.prt_log(msg,1)
+            s.prt_log(msg, 1)
         else:
             s.prt_log(f'{name} has been stopped', 0)
-
 
     def _check_name(self, name):
         result = s.re_search(r'^[a-zA-Z][a-zA-Z0-9_]*$', name)
@@ -1308,7 +1286,6 @@ class Target():
             r'^iqn\.\d{4}-(0[0-9]|1[0-9]|20)\.[a-z0-9][-a-z0-9]{0,62}(\.[a-z0-9][-a-z0-9]{0,62})+(:[a-z0-9.:-]+)?$',
             iqn)
         return True if result else False
-
 
     def _check_status(self, name):
         """
@@ -1340,12 +1317,11 @@ class LogicalUnit():
         self.logger = log.Log()
         self.js = iscsi_json.JsonOperation()
 
-
     def _get_all_drbdInuse(self):
         data = self.js.json_data['LogicalUnit']
         return [x['path'] for x in data.values()]
 
-    def create(self,target,disk,hosts):
+    def create(self, target, disk, hosts, name=None):
         """
         create iSCSI Logical Unit
         :param target:
@@ -1355,28 +1331,27 @@ class LogicalUnit():
         """
 
         # 验证
-        if not self.js.check_key('Disk',disk):
+        if not self.js.check_key('Disk', disk):
             s.prt_log(f"Fail！Can't find {disk}", 1)
             return
 
         # 一个disk只能被一个logical unit使用
         drbd_path = self.js.json_data['Disk'][disk]
         if drbd_path in self._get_all_drbdInuse():
-            s.prt_log(f'The disk "{disk}" has been used',1)
+            s.prt_log(f'The disk "{disk}" has been used', 1)
             return
 
-        if not self.js.check_key('Target',target):
+        if not self.js.check_key('Target', target):
             s.prt_log(f"Fail！Can't find {target}", 1)
             return
-
 
         for host in hosts:
             if self.js.check_key('Host', host) == False:
                 s.prt_log(f"Fail! Can't find {host}.Please give the true name.", 1)
                 return
 
-
-        name = f'lun_{disk}'
+        if not name:
+            name = f'lun_{disk}'
         target_iqn = self._get_target_iqn(target)
         path = self._get_path(disk)
         lunid = str(int(path[-4:]) - 1000)
@@ -1385,38 +1360,36 @@ class LogicalUnit():
 
         # 执行
         try:
-            ISCSILogicalUnit().create(name,disk,target_iqn,lunid,path," ".join(initiator_iqns))
-            Colocation().create(f'col_{name}', name, target) # 这里的name，是指disk，还是logicalunit？
+            ISCSILogicalUnit().create(name, disk, target_iqn, lunid, path, " ".join(initiator_iqns))
+            Colocation().create(f'col_{name}', name, target)  # 这里的name，是指disk，还是logicalunit？
             Order().create(f'or_{name}', target, name)
             Order().create(f'or_{name}_prtblk_off', name, f'{portal}_prtblk_off')
         except Exception as ex:
-            s.prt_log('出错，退出',1)
+            s.prt_log('出错，退出', 1)
             return
 
         else:
-            #启动资源
+            # 启动资源
             CRMConfig().start_res(name)
 
         # 配置文件更新
         status = self._check_status(name)
         if status == 'OK':
-            self.js.update_data('LogicalUnit', name, {'lun_id': lunid, 'target':target,'path':path,'initiators':initiator_iqns})
+            self.js.update_data('LogicalUnit', name,
+                                {'lun_id': lunid, 'target': target, 'path': path, 'initiators': initiator_iqns})
             self.js.json_data['Target'][target]['lun'].append(name)
             self.js.commit_data()
-
 
     def modify(self):
         # 可以设置修改target_iqn
         pass
 
-
-    def delete(self,name):
+    def delete(self, name):
         # 验证
 
-        if not self.js.check_key('LogicalUnit',name):
+        if not self.js.check_key('LogicalUnit', name):
             s.prt_log(f"Fail！Can't find {name}", 1)
             return
-
 
         # LogicalUnit正在使用中时，直接退出
         # dict_logicalunit = self.js.json_data['LogicalUnit'][name]
@@ -1426,7 +1399,7 @@ class LogicalUnit():
         #     return
 
         # 正在使用中时，交互确认
-        if CRMConfig().get_crm_res_status(name,'iSCSILogicalUnit') == 'Started':
+        if CRMConfig().get_crm_res_status(name, 'iSCSILogicalUnit') == 'Started':
             print(f'resource {name} is running, confirm to delete? y/n')
             answer = s.get_answer()
             if not answer in ['y', 'yes', 'Y', 'YES']:
@@ -1436,11 +1409,11 @@ class LogicalUnit():
         try:
             ISCSILogicalUnit().delete(name)
         except Exception as ex:
-            s.prt_log('出现异常，请检查',1)
+            s.prt_log('出现异常，请检查', 1)
             return
 
         # 验证
-        if not CRMConfig().get_crm_res_status(name,'iSCSILogicalUnit'):
+        if not CRMConfig().get_crm_res_status(name, 'iSCSILogicalUnit'):
             target = self.js.json_data['LogicalUnit'][name]['target']
             self.js.json_data['Target'][target]['lun'].remove(name)
             self.js.delete_data('LogicalUnit', name)
@@ -1448,7 +1421,6 @@ class LogicalUnit():
             print(f'Delete {name} successfully')
         else:
             print(f'Failed to delete {name}, please check')
-
 
     def show(self):
         """
@@ -1460,7 +1432,7 @@ class LogicalUnit():
 
         dict_logicalunit = self.js.json_data['LogicalUnit']
         for target, data in dict_logicalunit.items():
-            status = CRMConfig().get_crm_res_status(target,'iSCSILogicalUnit')
+            status = CRMConfig().get_crm_res_status(target, 'iSCSILogicalUnit')
             hosts = self._get_host_data_for_show(data['initiators'])
             list_data.append([target, data['lun_id'], data['target'], data['path'], hosts, status])
 
@@ -1468,9 +1440,8 @@ class LogicalUnit():
         s.prt_log(table, 0)
         return list_data
 
-
     def add(self, logicalunit, hosts):
-        if not self.js.check_key('LogicalUnit',logicalunit):
+        if not self.js.check_key('LogicalUnit', logicalunit):
             s.prt_log(f"Fail！Can't find {logicalunit}", 1)
             return
 
@@ -1484,14 +1455,13 @@ class LogicalUnit():
                 s.prt_log(f'{host} is already on the "allowed initiators"', 1)
                 return
             initiators_add.append(initiator)
-        
+
         initiators = self.js.json_data['LogicalUnit'][logicalunit]['initiators']
         initiators.extend(initiators_add)
-        ISCSILogicalUnit().modify_initiators(logicalunit,initiators)
+        ISCSILogicalUnit().modify_initiators(logicalunit, initiators)
 
         # 配置文件更新
         self.js.commit_data()
-
 
     def remove(self, logicalunit, hosts):
         if not self.js.check_key('LogicalUnit', logicalunit):
@@ -1510,18 +1480,17 @@ class LogicalUnit():
             initiators_remove.append(initiator)
 
         initiators = self.js.json_data['LogicalUnit'][logicalunit]['initiators']
-        initiators = list(set(initiators)-set(initiators_remove))
+        initiators = list(set(initiators) - set(initiators_remove))
 
         if not initiators:
-            s.prt_log('Please keep at least one initiators',1)
+            s.prt_log('Please keep at least one initiators', 1)
             return
 
-        ISCSILogicalUnit().modify_initiators(logicalunit,initiators)
+        ISCSILogicalUnit().modify_initiators(logicalunit, initiators)
 
         # 配置文件更新
         self.js.json_data['LogicalUnit'][logicalunit]['initiators'] = initiators
         self.js.commit_data()
-
 
     def start(self, name):
         if not self.js.check_key('LogicalUnit', name):
@@ -1541,13 +1510,11 @@ class LogicalUnit():
 
         # 验证, 还没有确定判断是否成功启动的条件
         try:
-            crm_config.monitor_status_by_time(name,'iSCSILogicalUnit','Started',20)
+            crm_config.monitor_status_by_time(name, 'iSCSILogicalUnit', 'Started', 20)
         except TimeoutError as msg:
             s.prt_log(msg, 1)
         else:
             s.prt_log(f'{name} has been started', 0)
-
-
 
     def stop(self, name):
         # 前置判断
@@ -1581,20 +1548,19 @@ class LogicalUnit():
         else:
             s.prt_log(f'{name} has been stopped', 0)
 
-
-    def _get_path(self,disk):
+    def _get_path(self, disk):
         return self.js.json_data['Disk'][disk]
 
-    def _get_target_iqn(self,target):
+    def _get_target_iqn(self, target):
         return self.js.json_data['Target'][target]['target_iqn']
 
-    def _get_initiator_iqns(self,hosts):
+    def _get_initiator_iqns(self, hosts):
         return [self.js.json_data['Host'][host] for host in hosts]
 
-    def _get_host_data_for_show(self,list_iqn):
+    def _get_host_data_for_show(self, list_iqn):
         data_list = []
         for iqn in list_iqn:
-            for k,v in self.js.json_data['Host'].items():
+            for k, v in self.js.json_data['Host'].items():
                 if iqn == v:
                     one = f'{iqn}({k})'
                     break
@@ -1634,51 +1600,47 @@ class ISCSI():
         self.crm = CRMData()
         self.crm.get_crm_st()
 
-
-    def _get_portal(self,portal):
+    def _get_portal(self, portal):
         data = self.js.json_data['Portal'][portal]
-        status = self.crm.get_res_status(portal,type='IPaddr2')
-        result = {"portals":{data['ip']:{"status":status}}}
+        status = self.crm.get_res_status(portal, type='IPaddr2')
+        result = {"portals": {data['ip']: {"status": status}}}
         return result
 
-
-    def _get_lun(self,lun):
+    def _get_lun(self, lun):
         data = self.js.json_data['LogicalUnit'][lun]
-        status = self.crm.get_res_status(lun,type='iSCSILogicalUnit')
-        result = {"path":data['path'],"lun id":data['lun_id'],"status":status}
+        status = self.crm.get_res_status(lun, type='iSCSILogicalUnit')
+        result = {"path": data['path'], "lun id": data['lun_id'], "status": status}
         return result
 
-
-    def _get_initiators(self,host,luns):
+    def _get_initiators(self, host, luns):
         iqn = self.js.json_data['Host'][host]
         dict_luns = {}
         for lun in luns:
-            dict_luns.update({lun:self._get_lun(lun)})
-        result = {host:{"iqn":iqn,"map lun":len(luns)}}
+            dict_luns.update({lun: self._get_lun(lun)})
+        result = {host: {"iqn": iqn, "map lun": len(luns)}}
         result[host].update(dict_luns)
         return result
 
-
-    def _get_target(self,target,sep_initiator_list=None):
+    def _get_target(self, target, sep_initiator_list=None):
         data = self.js.json_data['Target'][target]
-        status = self.crm.get_res_status(target,type='iSCSITarget')
+        status = self.crm.get_res_status(target, type='iSCSITarget')
 
         initiators = {}
-        for iqn,luns in self._get_luns(target).items():
+        for iqn, luns in self._get_luns(target).items():
             host = self._get_host(iqn)
             if not sep_initiator_list:
                 initiator_data = self._get_initiators(host, luns)
                 initiators.update(initiator_data)
             elif sep_initiator_list and host in sep_initiator_list:
-                initiator_data = self._get_initiators(host,luns)
+                initiator_data = self._get_initiators(host, luns)
                 initiators.update(initiator_data)
                 break
 
         portal = self._get_portal(data['portal'])
-        result = {target:[data['target_iqn'],{"status":status},{"initiator":initiators},portal]}
+        result = {target: [data['target_iqn'], {"status": status}, {"initiator": initiators}, portal]}
         return result
 
-    def show(self,sep_node_list=None,sep_target_list=None,sep_initiator_list=None):
+    def show(self, sep_node_list=None, sep_target_list=None, sep_initiator_list=None):
         # 检查指定的参数是否在配值文件中
 
         # 检查配置文件数据
@@ -1690,35 +1652,33 @@ class ISCSI():
             if not sep_node_list:
                 for target in targets:
                     if sep_target_list and target in sep_target_list:
-                        tg = self._get_target(target,sep_initiator_list)
+                        tg = self._get_target(target, sep_initiator_list)
                         target_data.update(tg)
                     elif not sep_target_list:
-                        tg = self._get_target(target,sep_initiator_list)
+                        tg = self._get_target(target, sep_initiator_list)
                         target_data.update(tg)
-                result.update({node:target_data})
+                result.update({node: target_data})
 
             elif sep_node_list and node in sep_node_list:
                 for target in targets:
                     if sep_target_list and target in sep_target_list:
-                        tg = self._get_target(target,sep_initiator_list)
+                        tg = self._get_target(target, sep_initiator_list)
                         target_data.update(tg)
                     elif not sep_target_list:
-                        tg = self._get_target(target,sep_initiator_list)
+                        tg = self._get_target(target, sep_initiator_list)
                         target_data.update(tg)
-                result.update({node:target_data})
+                result.update({node: target_data})
 
         import yaml
-        print(yaml.dump(result,sort_keys=False))
+        print(yaml.dump(result, sort_keys=False))
         return result
 
-
-    def _get_host(self,sep_iqn):
-        for host,iqn in self.js.json_data['Host'].items():
+    def _get_host(self, sep_iqn):
+        for host, iqn in self.js.json_data['Host'].items():
             if iqn == sep_iqn:
                 return host
 
-
-    def _get_luns(self,target):
+    def _get_luns(self, target):
         luns = self.js.json_data['Target'][target]['lun']
         _dict = {}
         for lun in luns:
@@ -1730,4 +1690,3 @@ class ISCSI():
                     _dict.update({initiator: [lun]})
 
         return _dict
-
