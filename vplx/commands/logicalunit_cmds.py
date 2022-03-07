@@ -1,13 +1,14 @@
 import execute as ex
 import sundry as s
 
+
 class Usage():
     # logicalunit部分使用手册
     logicalunit = '''
     logicalunit(lun) {create(c)/modify(m)/delete(d)/show(s)/start/stop}'''
 
     logicalunit_create = '''
-    logicalunit(lun) create(c) -target TARGET -disk DISK -host HOST[HOST...]'''
+    logicalunit(lun) create(c) LOGICALUNIT -target TARGET -disk DISK -host HOST[HOST...] [-n <Name>]'''
 
     logicalunit_delete = '''
     logicalunit(lun) delete(d) LOGICALUNIT'''
@@ -28,8 +29,6 @@ class Usage():
     logicalunit(lun) stop LOGICALUNIT'''
 
 
-
-
 class LogicalUnitCommands():
 
     def __init__(self):
@@ -40,7 +39,7 @@ class LogicalUnitCommands():
         Add commands for the PORTAL management:create,delete,modify,show
         """
         logicalunit_parser = parser.add_parser(
-            'logicalunit', aliases=['lun'], help='logical unit operation',usage=Usage.logicalunit)
+            'logicalunit', aliases=['lun'], help='logical unit operation', usage=Usage.logicalunit)
         self.logicalunit_parser = logicalunit_parser
 
         logicalunit_subp = logicalunit_parser.add_subparsers(dest='logicalunit')
@@ -52,7 +51,16 @@ class LogicalUnitCommands():
             'create',
             aliases='c',
             help='Create the iSCSI Logical Unit',
-            usage = Usage.logicalunit_create)
+            usage=Usage.logicalunit_create)
+
+        p_create_logicalunit.add_argument(
+            '-n',
+            '-name',
+            '--name',
+            action='store',
+            dest='name',
+            help='Logical Unit Name'
+        )
 
         # add arguments of logicalunit create
         p_create_logicalunit.add_argument(
@@ -101,7 +109,7 @@ class LogicalUnitCommands():
         """
         # add arguments of logicalunit delete
         p_delete_logicalunit = logicalunit_subp.add_parser(
-            'delete', aliases='d', help='Delete the iSCSI Logical Unit',usage=Usage.logicalunit_delete)
+            'delete', aliases='d', help='Delete the iSCSI Logical Unit', usage=Usage.logicalunit_delete)
 
         p_delete_logicalunit.add_argument(
             'logicalunit',
@@ -112,7 +120,6 @@ class LogicalUnitCommands():
 
         logicalunit_parser.set_defaults(func=self.print_logicalunit_help)
 
-
         """
         add initiator
         """
@@ -122,11 +129,9 @@ class LogicalUnitCommands():
             help='add the IQN',
             usage=Usage.logicalunit_add)
 
-
         p_add_initiators.add_argument(
             'logicalunit',
             help='logicalunit name')
-
 
         p_add_initiators.add_argument(
             'hosts',
@@ -134,10 +139,7 @@ class LogicalUnitCommands():
             help='hosts',
             nargs='+')
 
-
         p_add_initiators.set_defaults(func=self.add)
-
-
 
         """
         remove initiator
@@ -148,18 +150,16 @@ class LogicalUnitCommands():
             help='remove the IQN',
             usage=Usage.logicalunit_remove)
 
-
         p_remove_initiators.add_argument(
             'logicalunit',
             help='logicalunit name')
-
 
         p_remove_initiators.add_argument(
             'hosts',
             action='store',
             help='hosts',
             nargs='+',
-            )
+        )
 
         p_remove_initiators.set_defaults(func=self.remove)
 
@@ -177,8 +177,6 @@ class LogicalUnitCommands():
 
         p_start_logicalunit.set_defaults(func=self.start)
 
-
-
         """
         Stop LogicalUnit
         """
@@ -191,18 +189,14 @@ class LogicalUnitCommands():
             'logicalunit',
             help='logicalunit name')
 
-
         p_stop_logicalunit.set_defaults(func=self.stop)
-
-
 
     @s.deco_record_exception
     def create(self, args):
         crm = ex.CRMData()
         crm.check()
         logicalunit = ex.LogicalUnit()
-        logicalunit.create(args.target,args.disk,args.host)
-
+        logicalunit.create(args.target, args.disk, args.host, args.name)
 
     @s.deco_record_exception
     def show(self, args):
@@ -210,7 +204,6 @@ class LogicalUnitCommands():
         crm.check()
         logicalunit = ex.LogicalUnit()
         logicalunit.show()
-
 
     @s.deco_record_exception
     def delete(self, args):
@@ -224,8 +217,7 @@ class LogicalUnitCommands():
         crm = ex.CRMData()
         crm.check()
         logicalunit = ex.LogicalUnit()
-        logicalunit.add(args.logicalunit,args.hosts)
-
+        logicalunit.add(args.logicalunit, args.hosts)
 
     @s.deco_record_exception
     def remove(self, args):
@@ -234,21 +226,17 @@ class LogicalUnitCommands():
         logicalunit = ex.LogicalUnit()
         logicalunit.remove(args.logicalunit, args.hosts)
 
-
-
-    def start(self,args):
+    def start(self, args):
         crm = ex.CRMData()
         crm.check()
         logicalunit = ex.LogicalUnit()
         logicalunit.start(args.logicalunit)
 
-
-    def stop(self,args):
+    def stop(self, args):
         crm = ex.CRMData()
         crm.check()
         logicalunit = ex.LogicalUnit()
         logicalunit.stop(args.logicalunit)
-
 
     def print_logicalunit_help(self, *args):
         self.logicalunit_parser.print_help()
