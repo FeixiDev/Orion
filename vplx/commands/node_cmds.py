@@ -9,7 +9,7 @@ class usage():
     node(n) {create(c)/modify(m)/delete(d)/show(s)}'''
 
     node_create = '''
-    node(n) create(c) NODE -ip IP -nt NODETYPE'''
+    node(n) create(c) NODE -ip IP [-nt NODETYPE]'''
 
     node_delete = '''
     node(n) delete(d) NODE'''
@@ -65,8 +65,8 @@ class NodeCommands():
             '-nt',
             dest='nodetype',
             action='store',
-            help='node type: {Controller,Auxiliary,Combined,Satellite}',
-            required=True)
+            help='node type: {Controller,Auxiliary,Combined}',
+            default='Combined')
 
         p_create_node.set_defaults(func=self.create)
 
@@ -166,7 +166,8 @@ class NodeCommands():
 
     @sd.deco_record_exception
     def modify(self, args):
-        pass
+        print("This feature is not yet developed")
+
 
     def print_node_help(self, *args):
         self.node_parser.print_help()
