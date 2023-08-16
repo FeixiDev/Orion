@@ -11,9 +11,7 @@ except ImportError:
 
 
 
-
-
-
+# 这种用法可以多学习一下
 class LinstorClientError(Exception):
     """
     Linstor exception with a message and exit code information
@@ -105,12 +103,9 @@ class DefaultState(object):
 
 
 class LinstorAPI():
-    LINSTOR_CONF = '/etc/linstor/linstor-client.conf'
-
     def __init__(self):
-        # self._linstor = None
+        self._linstor = None
         self._linstor_completer = None
-        self.get_linstorapi()
 
     @classmethod
     def parse_size_str(cls, size_str, default_unit="GiB"):
@@ -185,38 +180,29 @@ class LinstorAPI():
 
 
     def get_linstorapi(self,**kwargs):
-        # if self._linstor:
-        #     return self._linstor
+        if self._linstor:
+            return self._linstor
 
         if self._linstor_completer:
             return self._linstor_completer
 
         # TODO also read config overrides
-        # servers = ['linstor://localhost']
-        with open(LinstorAPI.LINSTOR_CONF) as f:
-            data = f.read()
-            contrl_list = re.findall('controllers=(.*)',data)[0]
-        servers = linstor.MultiLinstor.controller_uri_list(contrl_list)
+        servers = ['linstor://localhost']
         if 'parsed_args' in kwargs:
             cliargs = kwargs['parsed_args']
             servers = linstor.MultiLinstor.controller_uri_list(cliargs.controllers)
         if not servers:
             return None
 
-        for server in servers:
-            try:
-                self._linstor_completer = linstor.Linstor(server)
-                self._linstor_completer.connect()
-                break
-            except linstor.LinstorNetworkError as le:
-                pass
 
+        self._linstor_completer = linstor.Linstor(servers[0])
+        self._linstor_completer.connect()
         return self._linstor_completer
 
 
 
     def get_node(self,node=None):
-        msg = self._linstor_completer.node_list(node)[0]
+        msg = self.get_linstorapi().node_list(node)[0]
         time.sleep(0)
         lst = []
 
@@ -241,7 +227,7 @@ class LinstorAPI():
         :param sp: list,用于过滤
         :return:
         """
-        msg = self._linstor_completer.storage_pool_list(node,sp)[0]
+        msg = self.get_linstorapi().storage_pool_list(node,sp)[0]
         time.sleep(0)
         lst = []
         errors = []
@@ -265,20 +251,31 @@ class LinstorAPI():
                         'State':state_str
                         })
 
+            """
+                StoragePool,
+                Node,
+                Driver,
+                PoolName,
+                FreeCapacity,
+                TotalCapacity,
+                SupportsSnapshots,
+                State
+            """
+
+
             for error in storpool.reports:
                 if error not in errors:
                     errors.append(error)
 
         if errors:
-            pass
-            # print(errors)
+            print(errors)
 
         return lst
 
 
 
-    def get_resource(self,node=None,storagepool=None,resource=None):
-        msg = self._linstor_completer.volume_list(node,storagepool,resource)[0]
+    def get_resource(self,node=None,resource=None):
+        msg = self.get_linstorapi().volume_list(node,resource)[0]
         time.sleep(0)
         lst = []
         rsc_state_lkup = {x.node_name + x.name: x for x in msg.resource_states}
@@ -323,7 +320,7 @@ class LinstorAPI():
         :param name:
         :return: 返回的对象，属性ret_code为正整数，代表执行成功，负数代表执行失败
         """
-        msg = self._linstor_completer.resource_dfn_create(name)[-1]
+        msg = self.get_linstorapi().resource_dfn_create(name)[-1]
         result_code = 0 if msg.ret_code > 0 else 1
         output = msg.cause if msg.cause else msg.message
         return {'sts': result_code, 'rst':output}
@@ -337,13 +334,13 @@ class LinstorAPI():
         :return:
         """
         size_int_KB = LinstorAPI.parse_size_str(size_str)
-        msg = self._linstor_completer.volume_dfn_create(name,size_int_KB)[-1]
+        msg = self.get_linstorapi().volume_dfn_create(name,size_int_KB)[-1]
         result_code = 0 if msg.ret_code > 0 else 1
         output = msg.cause if msg.cause else msg.message
         return {'sts': result_code, 'rst':output}
 
     def delete_rd(self,name):
-        msg = self._linstor_completer.resource_dfn_delete(name)[-1]
+        msg = self.get_linstorapi().resource_dfn_delete(name)[-1]
         result_code = 0 if msg.ret_code > 0 else 1
         output = msg.cause if msg.cause else msg.message
         return {'sts': result_code, 'rst':output}
@@ -380,9 +377,9 @@ class LinstorAPI():
             )
         ]
 
-        msg = self._linstor_completer.resource_create(rscs=rscs)[-1]
+        msg = self.get_linstorapi().resource_create(rscs=rscs)[-1]
 
-        # msg_all = self._linstor_completer.resource_create(rscs=rscs)
+        # msg_all = self.get_linstorapi().resource_create(rscs=rscs)
         # print(msg_all)
         #
         # if len(msg_all) == 1:
@@ -399,7 +396,7 @@ class LinstorAPI():
 
 
     def delete_resource(self,node,resource):
-        msg = self._linstor_completer.resource_delete(node, resource)[-1]
+        msg = self.get_linstorapi().resource_delete(node, resource)[-1]
         # if msg_all[-1].is_success:
         #     print('111')
         #     msg = msg_all[-1]
@@ -428,7 +425,7 @@ class LinstorAPI():
         """
 
         try:
-            msg = self._linstor_completer.storage_pool_create(
+            msg = self.get_linstorapi().storage_pool_create(
                 node,
                 name,
                 driver,
@@ -444,7 +441,7 @@ class LinstorAPI():
 
 
     def delete_sp(self,node_name, storage_pool_name):
-        msg = self._linstor_completer.storage_pool_delete(
+        msg = self.get_linstorapi().storage_pool_delete(
             node_name,
             storage_pool_name
         )[-1]
@@ -476,7 +473,7 @@ class LinstorAPI():
     #         )
     #         for node in list_node
     #     ]
-    #     msg = self._linstor_completer.resource_create(rscs=rscs)
+    #     msg = self.get_linstorapi().resource_create(rscs=rscs)
     #
     #     for i in msg:
     #         result_code = 0 if i.ret_code > 0 else 1
@@ -486,35 +483,74 @@ class LinstorAPI():
 
 
 
-
-
-
-
-
+# 集群节点配置文件 cfile
+# cfile = {'storagepool':[]}
 #
-# def run():
-#     try:
-#         linstor_ = LinstorAPI()
-#         try:
-#             print(linstor_.get_resource())
-#             # print(linstor_.create_rd('res_b'))
-#             # print(linstor_.create_vd('res_b','10M'))
-#             # print(linstor_.create_resource('ubuntu','res_b'))
-#             # print(linstor_.create_sp('pool_b','ubuntu','LVM','drbdpool'))
-#             # print(linstor_.delete_sp('ubuntu','pool_b'))
-#             # print(linstor_.delete_resource('ubuntu','res_b'))
-#         except Exception as E:
-#         # linstor_.delete_rd('res_l')
-#             print(E)
-#         finally:
-#             import subprocess
-#             # subprocess.run('linstor rd d res_a',shell=True)
-#             # subprocess.run('linstor rd c res_a', shell=True)
-#         # linstor_.get_storagepool()
-#         #     linstor_.delete_resource(['ubuntu', 'vince2'], 'res_a')
 #
-#     except linstor.LinstorNetworkError as le:
-#         print(le)
+# # 写法1和写法2有什么优缺点
+#
+# # 写法1
+# class StoragePool1(LinstorOperation):
+#     def __init__(self,name):
+#         super().__init__()
+#         self.name = name
+#         if self.name in cfile['storagepool']:
+#             self.node = None
+#             self.driver_type = None
+#             self.driver_pool = None
+#             self.total_capacity = None
+#
+#         else:
+#             self.node = cfile['storagepool']['node']
+#
+#
+#     def create(self):
+#         # 可能不需要指定参数，直接用类属性进行定义
+#         pass
+#
+#
+#     def delete(self):
+#         pass
+#
+#
+#
+# # 写法2
+# class StoragePool2(LinstorOperation):
+#     def __init__(self):
+#         super().__init__()
+#
+#
+#     def create(self,name,node,driver):
+#         pass
+
+
+
+
+
+
+def run():
+    try:
+        linstor_ = LinstorAPI()
+        try:
+            linstor_.get_resource()
+            # print(linstor_.create_rd('res_b'))
+            # print(linstor_.create_vd('res_b','10M'))
+            # print(linstor_.create_resource('ubuntu','res_b'))
+            # print(linstor_.create_sp('pool_b','ubuntu','LVM','drbdpool'))
+            # print(linstor_.delete_sp('ubuntu','pool_b'))
+            # print(linstor_.delete_resource('ubuntu','res_b'))
+        except Exception as E:
+        # linstor_.delete_rd('res_l')
+            print(E)
+        finally:
+            import subprocess
+            # subprocess.run('linstor rd d res_a',shell=True)
+            # subprocess.run('linstor rd c res_a', shell=True)
+        # linstor_.get_storagepool()
+        #     linstor_.delete_resource(['ubuntu', 'vince2'], 'res_a')
+
+    except linstor.LinstorNetworkError as le:
+        print(le)
 
 
 
@@ -522,6 +558,5 @@ class LinstorAPI():
 
 
 if __name__ == "__main__":
-    # pass
-    # run()
     pass
+    # run()

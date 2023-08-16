@@ -8,7 +8,8 @@ Created on 2020/3/2
 from flask import Flask, jsonify, render_template, request, make_response, views
 import process
 from public import log
-from execute import stor 
+from execute import stor
+import datetime
 
 
 def cors_data(datadict):
@@ -36,6 +37,7 @@ def get_all_resource():
     pc = process.Process_data()
     RESOURCEDICT = pc.process_data_resource()
     return True
+
 
 
 class OprtResource(views.MethodView):  
@@ -141,9 +143,7 @@ class ResourceD(views.MethodView):
 
     def get(self):
         data = get_request_data()
-        print(data)
         ResourceD_data = data["resource_data"]
-        print(ResourceD_data)
         message = "删除成功"
         return cors_data(message)
 
@@ -176,10 +176,8 @@ class SpCreate(views.MethodView):
         sp = eval(data['storagepool'])
         obj_sp = stor.StoragePool()
         if sp['type'] == 'lvm':
-            print("22")
             sp_result = obj_sp.create_storagepool_lvm(sp['node_name'],sp['sp_name'],sp['volume'])
         elif sp['type'] == 'tlv':
-            print("111")
             sp_result = obj_sp.create_storagepool_thinlv(sp['node_name'],sp['sp_name'],sp['volume'])
         return cors_data(sp_result)
 
@@ -188,7 +186,6 @@ class NodeCreate(views.MethodView):
 
     def get(self):
         data = get_request_data()
-        print(data)
         tid = data['tid']
         node = eval(data['node'])
         obj_node = stor.Node()
@@ -199,10 +196,8 @@ class NodeCreate(views.MethodView):
 class ResourceCreate(views.MethodView):
 
     def get(self):
-        print("----------------------")
         data = get_request_data()
         res_data = eval(data['resource'])
-        print(data)
         type = data['type']
         res = res_data['res_name']
         # tid = data['tid']
@@ -213,7 +208,6 @@ class ResourceCreate(views.MethodView):
             size = res_data['size'] + res_data['size_unit']
             result = obj_res.create_res_manual(res,size,node,sp)
         elif type == 'auto_create':
-            print('auto_crete')
             size = res_data['size'] + res_data['size_unit']
             num = res_data['node_num']
             result = obj_res.create_res_auto(res,size,num)
@@ -254,9 +248,8 @@ class LINSTORView(views.MethodView):
         lvm = pc.get_option_lvm()
         sp = pc.get_option_sp()
         node_create = pc.get_option_node()
-        
-        print(node_create)
         node_num = pc.get_option_nodenum()
+        time2 = datetime.datetime.now()
         return cors_data("success")
 
 
@@ -274,8 +267,8 @@ sp2 = {'code': 0, 'msg': '', 'count': 1000,
 
 class spView(views.MethodView):  
     def get(self):
-#         return cors_data(sp)
-        return cors_data(sp2)
+        return cors_data(sp)
+#         return cors_data(sp2)
 
     
     
@@ -299,8 +292,6 @@ class LINSTORModify(views.MethodView):
 
     def get(self):
         data = get_request_data()
-        print(data)
         ResourceM_data = data["resource_data"]
-        print(ResourceM_data)
         message = "修改成功"
         return cors_data(message)
