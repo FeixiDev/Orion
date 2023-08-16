@@ -3,6 +3,8 @@ import execute as ex
 import sundry as s
 import sqlite3
 
+import scheduler
+
 import datetime
 import scheduler
 
@@ -227,7 +229,10 @@ class LinstorDB(Database):
 
         insert_ntb_sql = '''insert into nodetb(Node,NodeType,Addresses,State)values(?,?,?,?)'''
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7a1de2aef10c7f4f9e73234bc01f989be7dcdad8
         # linstor = ex.Linstor()
         # node = linstor.get_linstor_data('linstor --no-color --no-utf8 n l')
         # res = linstor.get_linstor_data('linstor --no-color --no-utf8 r lv')
@@ -240,9 +245,6 @@ class LinstorDB(Database):
         self.insert_data2(insert_ntb_sql, data['node_data'], 'nodetb')
         self.insert_data2(insert_rtb_sql, data['res_data'], 'resourcetb')
         self.insert_data2(insert_stb_sql, data['sp_data'], 'storagepooltb')
-
-
-
 
 
     @s.deco_db_insert
@@ -258,8 +260,6 @@ class LinstorDB(Database):
         for dict in list_data:
             list_data = [x for x in dict.values()]
             self.cur.execute(sql, list_data)
-
-
 
 
 class CollectData(LinstorDB):
