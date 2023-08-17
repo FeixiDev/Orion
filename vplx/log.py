@@ -66,6 +66,12 @@ class MyLoggerAdapter(logging.LoggerAdapter):
         logger.addHandler(handler_input)
         logger.setLevel(logging.DEBUG)
         self.handler_input = handler_input
+
+        # 移除root logger中的所有StreamHandler
+        for handler in logging.root.handlers[:]:
+            if isinstance(handler, logging.StreamHandler):
+                logging.root.removeHandler(handler)
+
         return logger
 
     def remove_my_handler(self):
