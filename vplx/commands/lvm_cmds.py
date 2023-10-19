@@ -166,22 +166,30 @@ class LVMCommands():
 
         node_list = []
         api = ex.linstor_api.LinstorAPI()
-        if args.node:
-            node_list.append(args.node)
-        else:
-            node_dict = api.get_node()
-            for node in node_dict:
-                node_list.append(node["Node"])
+        # #删除指定节点展示功能
+        # if args.node:
+        #     node_list.append(args.node)
+        # else:
+        #     node_dict = api.get_node()
+        #     for node in node_dict:
+        #         node_list.append(node["Node"])
         if args.vg and args.device:
             print(f"Only show unused lvm device, message of {args.vg} will not display")
-        for node in node_list:
-            print()
-            print('=' * 15, "Node:", node, '=' * 15)
-            lvm_operation = lvm.ClusterLVM(node)
-            if args.device:
-                lvm_operation.show_unused_lvm_device()
-            else:
-                lvm_operation.show_vg(args.vg)
+        # # 删除指定节点展示功能
+        # for node in node_list:
+        #     print()
+        #     print('=' * 15, "Node:", node, '=' * 15)
+        #     lvm_operation = lvm.ClusterLVM(node)
+        #     if args.device:
+        #         lvm_operation.show_unused_lvm_device()
+        #     else:
+        #         lvm_operation.show_vg(args.vg)
+        lvm_operation = lvm.ClusterLVM()
+        if args.device:
+            lvm_operation.show_unused_lvm_device()
+        else:
+            lvm_operation.show_vg(args.vg)
+
 
     @sd.deco_record_exception
     def create(self, args):
