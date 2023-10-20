@@ -12,16 +12,16 @@ class Usage():
     lvm {create(c)/delete(d)/show(s)}'''
 
     lvm_create = '''
-        lvm create(c) NAME -n NODE -t vg -d DEVICE [DEVICE...]
-        lvm create(c) NAME -n NODE -t thinpool -d DEVICE [DEVICE...] -s SIZE
-        lvm create(c) NAME -n NODE -t thinpool -vg VG -s SIZE'''
+        lvm create(c) NAME -t vg -d DEVICE [DEVICE...]
+        lvm create(c) NAME -t thinpool -d DEVICE [DEVICE...] -s SIZE
+        lvm create(c) NAME -t thinpool -vg VG -s SIZE'''
 
     lvm_delete = '''
-        lvm delete(d) NAME -n NODE -t vg
-        lvm delete(d) NAME -n NODE -t thinpool [-dvg]'''
+        lvm delete(d) NAME -t vg
+        lvm delete(d) NAME -t thinpool [-dvg]'''
 
     lvm_show = '''
-        lvm show(s) [-n NODE] [-vg VG] [-d]'''
+        lvm show(s) [-vg VG] [-d]'''
 
 
 class LVMCommands():
@@ -195,7 +195,8 @@ class LVMCommands():
 
     @sd.deco_record_exception
     def create(self, args):
-        lvm_operation = lvm.ClusterLVM(args.node)
+        node = utils.get_hostname()
+        lvm_operation = lvm.ClusterLVM(node)
         if args.type == "vg":
             if lvm_operation.check_vg_exit(args.name):
                 if args.device:
@@ -247,7 +248,8 @@ class LVMCommands():
 
     @sd.deco_record_exception
     def delete(self, args):
-        lvm_operation = lvm.ClusterLVM(args.node)
+        node = utils.get_hostname()
+        lvm_operation = lvm.ClusterLVM(node)
         if args.type == "vg":
             lvm_operation.delete_vg(args.name)
         if args.type == "thinpool":
