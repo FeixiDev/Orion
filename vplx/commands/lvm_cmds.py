@@ -3,6 +3,7 @@ import sundry as sd
 import execute.lvm_operation as lvm
 import sys
 import random
+import utils
 
 
 class Usage():
@@ -61,13 +62,13 @@ class LVMCommands():
             dest='size',
             action='store',
             help='Size of thinpool')
-        p_create_lvm.add_argument(
-            '-n',
-            '--node',
-            dest='node',
-            action='store',
-            help='Create LVM on this Node',
-            required=True)
+        # p_create_lvm.add_argument(
+        #     '-n',
+        #     '--node',
+        #     dest='node',
+        #     action='store',
+        #     help='Create LVM on this Node',
+        #     required=True)
         p_create_lvm.add_argument(
             '-d',
             '--device',
@@ -105,13 +106,13 @@ class LVMCommands():
             metavar='name',
             action='store',
             help='Name of the vg or thinpool')
-        p_delete_lvm.add_argument(
-            '-n',
-            '--node',
-            dest='node',
-            action='store',
-            help='Delete LVM on this Node',
-            required=True)
+        # p_delete_lvm.add_argument(
+        #     '-n',
+        #     '--node',
+        #     dest='node',
+        #     action='store',
+        #     help='Delete LVM on this Node',
+        #     required=True)
         p_delete_lvm.add_argument(
             '-t',
             '--type',
@@ -138,12 +139,12 @@ class LVMCommands():
             help='Display the LVM information',
             usage=Usage.lvm_show)
         self.p_show_lvm = p_show_lvm
-        p_show_lvm.add_argument(
-            '-n',
-            '--node',
-            dest='node',
-            action='store',
-            help='Display LVM on this Node')
+        # p_show_lvm.add_argument(
+        #     '-n',
+        #     '--node',
+        #     dest='node',
+        #     action='store',
+        #     help='Display LVM on this Node')
         p_show_lvm.add_argument(
             '-vg',
             dest='vg',
@@ -184,7 +185,8 @@ class LVMCommands():
         #         lvm_operation.show_unused_lvm_device()
         #     else:
         #         lvm_operation.show_vg(args.vg)
-        lvm_operation = lvm.ClusterLVM()
+        node = utils.get_hostname()
+        lvm_operation = lvm.ClusterLVM(node)
         if args.device:
             lvm_operation.show_unused_lvm_device()
         else:
