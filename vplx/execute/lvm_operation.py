@@ -84,7 +84,8 @@ class ClusterLVM(object):
         if result:
             if result["st"]:
                 lvm_list = re.findall('(\S+)\s+\[\s*(\S+\s\w+)\]\s+', result["rt"])
-                return lvm_list
+                lvm_list1 = [i for i in lvm_list if "/dev/loop" not in i[0]]
+                return lvm_list1
 
     def get_filesys(self):
         """获取所有可见的LVM2设备"""
