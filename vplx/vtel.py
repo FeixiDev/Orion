@@ -110,21 +110,25 @@ class VtelCLI(object):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser_iscsi = subp.add_parser(
-            'iscsi',
-            help='Management operations for iSCSI')
+        ##注释掉iscsi功能
+        # parser_iscsi = subp.add_parser(
+        #     'iscsi',
+        #     help='Management operations for iSCSI')
 
         self.parser_stor = parser_stor
-        self.parser_iscsi = parser_iscsi
+        # #注释掉iscsi功能
+        # self.parser_iscsi = parser_iscsi
 
         subp_stor = parser_stor.add_subparsers(dest='subargs_stor',metavar='')
-        subp_iscsi = parser_iscsi.add_subparsers(dest='subargs_iscsi',metavar='')
+        # #注释掉iscsi功能
+        # subp_iscsi = parser_iscsi.add_subparsers(dest='subargs_iscsi',metavar='')
 
-        parser_iscsi_show = subp_iscsi.add_parser('show',aliases=['s'],help='Show iSCSI resource information')
-        parser_iscsi_show.add_argument('-n','--node', dest='node', help='Specify a node',nargs='+')
-        parser_iscsi_show.add_argument('-t','--target', dest='target', help='Specify a target',nargs='+')
-        parser_iscsi_show.add_argument('-i','--initiator', dest='initiator', help='Specify a initiators',nargs='+')
-        parser_iscsi_show.set_defaults(func=self.iscsi_show)
+        # #注释掉iscsi功能
+        # parser_iscsi_show = subp_iscsi.add_parser('show',aliases=['s'],help='Show iSCSI resource information')
+        # parser_iscsi_show.add_argument('-n','--node', dest='node', help='Specify a node',nargs='+')
+        # parser_iscsi_show.add_argument('-t','--target', dest='target', help='Specify a target',nargs='+')
+        # parser_iscsi_show.add_argument('-i','--initiator', dest='initiator', help='Specify a initiators',nargs='+')
+        # parser_iscsi_show.set_defaults(func=self.iscsi_show)
 
 
 
@@ -136,18 +140,19 @@ class VtelCLI(object):
         self._resource_commands.setup_commands(subp_stor)
         self._storagepool_commands.setup_commands(subp_stor)
 
-        self._disk_commands.setup_commands(subp_iscsi)
-        self._diskgroup_commands.setup_commands(subp_iscsi)
-        self._host_commands.setup_commands(subp_iscsi)
-        self._hostgroup_commands.setup_commands(subp_iscsi)
-        self._map_commands.setup_commands(subp_iscsi)
-        self._portal_commands.setup_commands(subp_iscsi)
-        self._target_commands.setup_commands(subp_iscsi)
-        self._logicalunit_commands.setup_commands(subp_iscsi)
-
-        self._sync_commands.setup_commands(subp_iscsi)
-
-        parser_iscsi.set_defaults(func=self.print_iscsi_help)
+        # #注释掉iscsi功能
+        # self._disk_commands.setup_commands(subp_iscsi)
+        # self._diskgroup_commands.setup_commands(subp_iscsi)
+        # self._host_commands.setup_commands(subp_iscsi)
+        # self._hostgroup_commands.setup_commands(subp_iscsi)
+        # self._map_commands.setup_commands(subp_iscsi)
+        # self._portal_commands.setup_commands(subp_iscsi)
+        # self._target_commands.setup_commands(subp_iscsi)
+        # self._logicalunit_commands.setup_commands(subp_iscsi)
+        #
+        # self._sync_commands.setup_commands(subp_iscsi)
+        #
+        # parser_iscsi.set_defaults(func=self.print_iscsi_help)
         parser_stor.set_defaults(func=self.print_stor_help)
         self.parser.set_defaults(func=self.func_vtel)
 
