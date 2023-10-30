@@ -1,17 +1,17 @@
 # coding:utf-8
+import datetime
 import logging
 import logging.handlers
 import logging.config
 import threading
 import getpass
 import time
-import os
 from random import shuffle
 import sys
 
 
 
-LOG_PATH = f'{os.getcwd()}/'
+LOG_PATH = f'{sys.path[0]}/'
 # LOG_PATH = '/var/log/vtel/'
 CLI_LOG_NAME = 'cli.log'
 WEB_LOG_NAME = 'web.log'
@@ -67,12 +67,6 @@ class MyLoggerAdapter(logging.LoggerAdapter):
         logger.addHandler(handler_input)
         logger.setLevel(logging.DEBUG)
         self.handler_input = handler_input
-
-        # 移除root logger中的所有StreamHandler
-        for handler in logging.root.handlers[:]:
-            if isinstance(handler, logging.StreamHandler):
-                logging.root.removeHandler(handler)
-
         return logger
 
     def remove_my_handler(self):
@@ -118,9 +112,17 @@ class Log(object):
 
         return Log._instance
 
+    def generate_log_filename(self):  ##
+        current_time = datetime.datetime.now()
+        formatted_time = current_time.strftime('%Y_%m_%d_%H_%M_%S')
+        return f'vsdsadm_{formatted_time}.log'
+    
     # write to log file
     def write_to_log(self, t1, t2, d1, d2, data):
         logger = Log._instance.logger
+
+        log_file_name = self.generate_log_filename()   ####
+        self.log_path = f'{sys.path[0]}/{log_file_name}'  ####
 
         # 获取到日志开关不为True时，移除处理器，不再将数据记录到文件中
         if not self.log_switch:
