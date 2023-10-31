@@ -13,8 +13,10 @@ import sys
 
 LOG_PATH = f'{sys.path[0]}/'
 # LOG_PATH = '/var/log/vtel/'
-CLI_LOG_NAME = 'cli.log'
-WEB_LOG_NAME = 'web.log'
+current_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
+CLI_LOG_NAME = f"vsdsiptool_{current_time}.log"
+WEB_LOG_NAME = f"vsdsiptool_{current_time}.log"
 
 
 def get_username():
