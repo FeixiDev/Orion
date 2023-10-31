@@ -3,6 +3,7 @@ import datetime
 import logging
 import logging.handlers
 import logging.config
+import os
 import threading
 import getpass
 import time
@@ -11,7 +12,7 @@ import sys
 
 
 
-LOG_PATH = f'{sys.path[0]}/'
+LOG_PATH = os.getcwd()
 # LOG_PATH = '/var/log/vtel/'
 current_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
@@ -114,17 +115,17 @@ class Log(object):
 
         return Log._instance
 
-    def generate_log_filename(self):  ##
-        current_time = datetime.datetime.now()
-        formatted_time = current_time.strftime('%Y_%m_%d_%H_%M_%S')
-        return f'vsdsadm_{formatted_time}.log'
+    # def generate_log_filename(self):  ##
+    #     current_time = datetime.datetime.now()
+    #     formatted_time = current_time.strftime('%Y_%m_%d_%H_%M_%S')
+    #     return f'vsdsadm_{formatted_time}.log'
     
     # write to log file
     def write_to_log(self, t1, t2, d1, d2, data):
         logger = Log._instance.logger
 
-        log_file_name = self.generate_log_filename()   ####
-        self.log_path = f'{sys.path[0]}/{log_file_name}'  ####
+        # log_file_name = self.generate_log_filename()   ####
+        # self.log_path = os.path.join(os.getcwd(), log_file_name)  ####
 
         # 获取到日志开关不为True时，移除处理器，不再将数据记录到文件中
         if not self.log_switch:
