@@ -1,5 +1,4 @@
 # coding:utf-8
-import datetime
 import logging
 import logging.handlers
 import logging.config
@@ -8,17 +7,16 @@ import threading
 import getpass
 import time
 from random import shuffle
-import sys
 
 
 
-LOG_PATH = os.getcwd()
-# LOG_PATH = '/var/log/vtel/'
+
+
+LOG_PATH = f"{os.getcwd()}/"
 current_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
 CLI_LOG_NAME = f"vsdsadm_{current_time}.log"
 WEB_LOG_NAME = f"vsdsadm_{current_time}.log"
-
 
 def get_username():
     return getpass.getuser()
@@ -77,6 +75,9 @@ class MyLoggerAdapter(logging.LoggerAdapter):
         if self.handler_input:
             self.logger.removeHandler(self.handler_input)
 
+
+
+
 class Log(object):
     _instance_lock = threading.Lock()
     # _instance = None
@@ -88,7 +89,6 @@ class Log(object):
     logger = None
 
     def __init__(self):
-
         """
         日志格式：
         asctime：时间
@@ -111,32 +111,24 @@ class Log(object):
             with Log._instance_lock:
                 if not hasattr(cls, '_instance'):
                     Log._instance = super().__new__(cls)
-                    Log._instance.logger = MyLoggerAdapter(cls.log_path,cls.file_name)
+                    Log._instance.logger = MyLoggerAdapter(LOG_PATH,CLI_LOG_NAME)
 
         return Log._instance
 
-    # def generate_log_filename(self):  ##
-    #     current_time = datetime.datetime.now()
-    #     formatted_time = current_time.strftime('%Y_%m_%d_%H_%M_%S')
-    #     return f'vsdsadm_{formatted_time}.log'
-    
     # write to log file
     def write_to_log(self, t1, t2, d1, d2, data):
-        logger = Log._instance.logger
-
-        # log_file_name = self.generate_log_filename()   ####
-        # self.log_path = os.path.join(os.getcwd(), log_file_name)  ####
-
+        vtel_logger = Log._instance.logger
         # 获取到日志开关不为True时，移除处理器，不再将数据记录到文件中
         if not self.log_switch:
-            logger.remove_my_handler()
+            vtel_logger.remove_my_handler()
 
         if not self.user:
             self.user = get_username()
         if not self.tid:
             self.tid = create_transaction_id()
-        logger.debug(
-            "",
+
+        vtel_logger.debug(
+            '',
             extra={
                 'user': self.user,
                 'tid': self.tid,
@@ -145,7 +137,4 @@ class Log(object):
                 'd1': d1,
                 'd2': d2,
                 'data': data})
-
-
-
 
