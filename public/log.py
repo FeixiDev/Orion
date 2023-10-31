@@ -1,4 +1,5 @@
 # coding:utf-8
+import datetime
 import logging
 import logging.handlers
 import logging.config
@@ -6,12 +7,11 @@ import threading
 import getpass
 import time
 from random import shuffle
+import sys
 
 
 
-
-
-LOG_PATH = '../vplx/'
+LOG_PATH = f'{sys.path[0]}/'
 # LOG_PATH = '/var/log/vtel/'
 CLI_LOG_NAME = 'cli.log'
 WEB_LOG_NAME = 'web.log'
@@ -74,9 +74,6 @@ class MyLoggerAdapter(logging.LoggerAdapter):
         if self.handler_input:
             self.logger.removeHandler(self.handler_input)
 
-
-
-
 class Log(object):
     _instance_lock = threading.Lock()
     # _instance = None
@@ -88,6 +85,7 @@ class Log(object):
     logger = None
 
     def __init__(self):
+
         """
         日志格式：
         asctime：时间
@@ -110,24 +108,32 @@ class Log(object):
             with Log._instance_lock:
                 if not hasattr(cls, '_instance'):
                     Log._instance = super().__new__(cls)
-                    Log._instance.logger = MyLoggerAdapter(LOG_PATH,CLI_LOG_NAME)
+                    Log._instance.logger = MyLoggerAdapter(cls.log_path,cls.file_name)
 
         return Log._instance
 
+    def generate_log_filename(self):  ##
+        current_time = datetime.datetime.now()
+        formatted_time = current_time.strftime('%Y_%m_%d_%H_%M_%S')
+        return f'vsdsadm_{formatted_time}.log'
+    
     # write to log file
     def write_to_log(self, t1, t2, d1, d2, data):
-        vtel_logger = Log._instance.logger
+        logger = Log._instance.logger
+
+        log_file_name = self.generate_log_filename()   ####
+        self.log_path = f'{sys.path[0]}/{log_file_name}'  ####
+
         # 获取到日志开关不为True时，移除处理器，不再将数据记录到文件中
         if not self.log_switch:
-            vtel_logger.remove_my_handler()
+            logger.remove_my_handler()
 
         if not self.user:
             self.user = get_username()
         if not self.tid:
             self.tid = create_transaction_id()
-
-        vtel_logger.debug(
-            '',
+        logger.debug(
+            "",
             extra={
                 'user': self.user,
                 'tid': self.tid,
@@ -136,4 +142,7 @@ class Log(object):
                 'd1': d1,
                 'd2': d2,
                 'data': data})
+
+
+
 
