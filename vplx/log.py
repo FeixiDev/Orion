@@ -12,7 +12,7 @@ import sys
 
 
 
-LOG_PATH = os.getcwd()
+LOG_PATH = f"{os.getcwd()}/"
 # LOG_PATH = '/var/log/vtel/'
 current_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
