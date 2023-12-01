@@ -412,16 +412,30 @@ class Resource():
 
     # 创建resource --diskless
     def create_res_diskless(self, node, res):
-        cmd = f'linstor r c {node[0]} {res} --diskless'
-        result = execute_linstor_cmd(cmd)
-        if result['sts'] == 0:
-            s.prt_log('SUCCESS', 0)
-        elif result['sts'] == 1:
-            s.prt_log(f"SUCCESS\n{result['rst']}", 1)
-        elif result['sts'] == 2:
-            s.prt_log(f"FAIL\n{result['rst']}", 1)
-        else:
-            s.prt_log(f"FAIL\n{result['rst']}", 2)
+        nodes = [node] if isinstance(node, str) else node
+        for node in nodes:
+            cmd = f'linstor r c {node} {res} --diskless'
+            result = execute_linstor_cmd(cmd)
+            if result['sts'] == 0:
+                s.prt_log('SUCCESS', 0)
+            elif result['sts'] == 1:
+                s.prt_log(f"SUCCESS\n{result['rst']}", 1)
+            elif result['sts'] == 2:
+                s.prt_log(f"FAIL\n{result['rst']}", 1)
+            else:
+                s.prt_log(f"FAIL\n{result['rst']}", 2)
+        #cmd = f'linstor r c {node[0]} {res} --diskless'
+        #print(f"cmd:{cmd}")
+        #print(f"res{res}")
+        #result = execute_linstor_cmd(cmd)
+        #if result['sts'] == 0:
+        #    s.prt_log('SUCCESS', 0)
+        #elif result['sts'] == 1:
+        #    s.prt_log(f"SUCCESS\n{result['rst']}", 1)
+        #elif result['sts'] == 2:
+        #    s.prt_log(f"FAIL\n{result['rst']}", 1)
+        #else:
+        #    s.prt_log(f"FAIL\n{result['rst']}", 2)
 
     # 删除resource,指定节点
     def delete_resource_des(self, node, res):

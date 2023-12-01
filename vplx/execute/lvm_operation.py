@@ -174,7 +174,13 @@ class ClusterLVM(object):
     def create_thinpool_by_free_vg(self, name, vg):
         """使用当前VG的全部剩余空间创建thinpool"""
         create_cmd = f'lvcreate -l +100%free --thinpool {name} {vg} -y'
-        utils.exec_cmd(create_cmd, )
+        result = utils.exec_cmd(cmd, )
+        if result["st"]:
+            s.prt_log(f"Success in createing Thinpool: {name}", 0)
+            return True
+        else:
+            s.prt_log(f"Failed to create Thinpool {name}", 1)
+            return False
 
     def create_thinlv(self, name, size, vg, thinpool):
         """创建thinlv"""

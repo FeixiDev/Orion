@@ -65,7 +65,7 @@ class NodeCommands():
             '-nt',
             dest='nodetype',
             action='store',
-            help='node type: {Controller,Auxiliary,Combined}',
+            help='node type: {Controller,Satellite,Combined}',
             default='Combined')
 
         p_create_node.set_defaults(func=self.create)
@@ -73,13 +73,13 @@ class NodeCommands():
         """
         Modify LINSTOR Node
         """
-        p_modify_node = node_subp.add_parser(
-            'modify',
-            aliases='m',
-            help='Modify the node',
-            usage=usage.node_create)
+        #p_modify_node = node_subp.add_parser(
+        #    'modify',
+        #    aliases='m',
+        #    help='Modify the node',
+        #    usage=usage.node_create)
 
-        p_modify_node.set_defaults(func=self.modify)
+        #p_modify_node.set_defaults(func=self.modify)
 
         """
         Delete LINSTOR Node

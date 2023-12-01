@@ -58,7 +58,7 @@ class VtelCLI(object):
     Vtel command line client
     """
     def __init__(self):
-        self.parser = MyArgumentParser(prog="vtel")
+        self.parser = MyArgumentParser(prog="vsdsadm")
         self.logger = log.Log()
         self._lvm_commands = LVMCommands()
         self._node_commands = NodeCommands()
@@ -159,7 +159,7 @@ class VtelCLI(object):
 
     def func_vtel(self,args):
         if args.version:
-            print(f'VersaTEL G2 {consts.VERSION}')
+            print(f'vsdsadm {consts.VERSION}')
         else:
             self.parser.print_help()
 
