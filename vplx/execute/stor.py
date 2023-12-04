@@ -416,14 +416,18 @@ class Resource():
         for node in nodes:
             cmd = f'linstor r c {node} {res} --diskless'
             result = execute_linstor_cmd(cmd)
-            if result['sts'] == 0:
-                s.prt_log('SUCCESS', 0)
-            elif result['sts'] == 1:
-                s.prt_log(f"SUCCESS\n{result['rst']}", 1)
-            elif result['sts'] == 2:
-                s.prt_log(f"FAIL\n{result['rst']}", 1)
+            if isinstance(result, dict):
+                if result['sts'] == 0:
+                    s.prt_log('SUCCESS', 0)
+                elif result['sts'] == 1:
+                    s.prt_log(f"SUCCESS\n{result['rst']}", 1)
+                elif result['sts'] == 2:
+                    s.prt_log(f"FAIL\n{result['rst']}", 1)
+                else:
+                    s.prt_log(f"FAIL\n{result['rst']}", 2)
             else:
-                s.prt_log(f"FAIL\n{result['rst']}", 2)
+            # 处理 result 是字符串的情况
+                s.prt_log(result, 2)
         #cmd = f'linstor r c {node[0]} {res} --diskless'
         #print(f"cmd:{cmd}")
         #print(f"res{res}")
