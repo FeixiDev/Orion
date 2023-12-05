@@ -13,7 +13,7 @@ import sys
 
 LOG_PATH = f'{os.getcwd()}/'
 # LOG_PATH = '/var/log/vtel/'
-current_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+current_time = time.strftime("%Y-%m-%d", time.localtime())
 CLI_LOG_NAME = f"vsdsadm_{current_time}.log"
 # CLI_LOG_NAME = 'cli.log'
 WEB_LOG_NAME = 'web.log'
