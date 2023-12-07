@@ -4,7 +4,7 @@ import execute as ex
 
 class usage():
     storagepool = '''
-    storagepool(sp) {create(c)/modify(m)/delete(d)/show(s)}'''
+    storagepool(sp) {create(c)/delete(d)/show(s)}'''
 
     storagepool_create = '''
     storagepool(sp) create(c) STORAGEPOOL -n NODE -lvm VG/-tlv THINLV'''

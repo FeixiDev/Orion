@@ -8,7 +8,7 @@ import log
 
 class usage():
     resource = '''
-    resource(r) {create(c)/modify(m)/delete(d)/show(s)}'''
+    resource(r) {create(c)/delete(d)/show(s)}'''
 
     resource_create = '''
     resource(r) create(c) RESOURCE -s SIZE -n NODE[NODE...] -sp STORAGEPOOL[STORAGEPOOL...]
@@ -49,7 +49,7 @@ class ResourceCommands():
         res_parser = parser.add_parser(
             'resource',
             aliases='r',
-            help='Management operations for storagepool',
+            help='Management operations for resource',
             usage=usage.resource)
         res_subp = res_parser.add_subparsers(dest='subargs_res')
         self.res_parser = res_parser
