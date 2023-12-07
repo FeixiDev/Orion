@@ -5,14 +5,17 @@ import logging.config
 import threading
 import getpass
 import time
+import os
 from random import shuffle
 import sys
 
 
 
-LOG_PATH = f'{sys.path[0]}/'
+LOG_PATH = f'{os.getcwd()}/'
 # LOG_PATH = '/var/log/vtel/'
-CLI_LOG_NAME = 'cli.log'
+current_time = time.strftime("%Y-%m-%d", time.localtime())
+CLI_LOG_NAME = f"vsdsadm_{current_time}.log"
+# CLI_LOG_NAME = 'cli.log'
 WEB_LOG_NAME = 'web.log'
 
 

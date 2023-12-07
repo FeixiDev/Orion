@@ -40,10 +40,11 @@ class ClusterLVM(object):
             self.sp = None
             self.res = None
 
-        if node == utils.get_hostname():
-            self.conn = None
-        else:
-            self.conn = utils.SSHConn(node)
+        ## 取消ssh功能
+        # if node == utils.get_hostname():
+        #     self.conn = None
+        # else:
+        #     self.conn = utils.SSHConn(node)
 
         self.pv_list = self.get_pvs()
         self.vg_list = self.get_vgs()
@@ -52,7 +53,7 @@ class ClusterLVM(object):
     # def create_linstor_thinpool(self, name, node, list_pv):
     #     pv = ' '.join(list_pv)
     #     cmd = f"linstor ps cdp --pool-name {name} lvmthin {node} {pv}"
-    #     result = utils.exec_cmd(cmd, self.conn)
+    #     result = utils.exec_cmd(cmd, )
     #     if result["st"]:
     #         return True
     #     else:
@@ -62,7 +63,7 @@ class ClusterLVM(object):
     # def create_linstor_vg(self, name, node, list_pv):
     #     pv = ' '.join(list_pv)
     #     cmd = f"linstor ps cdp --pool-name {name} lvm {node} {pv}"
-    #     result = utils.exec_cmd(cmd, self.conn)
+    #     result = utils.exec_cmd(cmd, )
     #     if result["st"]:
     #         return True
     #     else:
@@ -79,16 +80,17 @@ class ClusterLVM(object):
     def get_lvm_device(self):
         """获取所有可见的LVM2设备"""
         cmd = "lvmdiskscan"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
                 lvm_list = re.findall('(\S+)\s+\[\s*(\S+\s\w+)\]\s+', result["rt"])
-                return lvm_list
+                lvm_list1 = [i for i in lvm_list if "/dev/loop" not in i[0]]
+                return lvm_list1
 
     def get_filesys(self):
         """获取所有可见的LVM2设备"""
         cmd = "df"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
                 fs_list = re.findall('(\S+)(?:\s+(?:\d+|-)){3}\s+\S+\s+\S\s*', result["rt"])
@@ -97,7 +99,7 @@ class ClusterLVM(object):
     def get_pvs(self):
         """获取pv类型数据"""
         cmd = "pvs --noheadings"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd)
         if result:
             if result["st"]:
                 vgs_list = re.findall('(\S+)\s+(\S*)\s+lvm2\s+\S+\s+(\S+)\s+(\S+)\s*?', result["rt"])
@@ -107,7 +109,7 @@ class ClusterLVM(object):
     def get_vgs(self):
         """获取vg类型数据"""
         cmd = "vgs --noheadings"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd)
         if result:
             if result["st"]:
                 vgs_list = re.findall('(\S+)\s+(\d+)\s+(\d+)\s+\d+\s+\S+\s+(\S+)\s+(\S+)\s*?', result["rt"])
@@ -117,7 +119,7 @@ class ClusterLVM(object):
     def get_lvs(self):
         """获取lv类型数据"""
         cmd = "lvs --noheadings"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd)
         if result:
             if result["st"]:
                 vgs_list = re.findall('(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s(\S*).*\s', result["rt"])
@@ -127,7 +129,7 @@ class ClusterLVM(object):
     def create_pv(self, device):
         """创建pv"""
         cmd = f"pvcreate {device} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in createing PV: {device}", 0)
             return True
@@ -139,7 +141,7 @@ class ClusterLVM(object):
         """创建vg"""
         pv = ' '.join(list_pv)
         cmd = f"vgcreate {name} {pv} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in createing VG: {name}", 0)
             return True
@@ -150,7 +152,7 @@ class ClusterLVM(object):
     def create_lv(self, name, size, vg):
         """创建lv"""
         cmd = f"lvcreate -n {name} -L {size} {vg} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in createing LV: {name}", 0)
             return True
@@ -161,7 +163,7 @@ class ClusterLVM(object):
     def create_thinpool(self, name, size, vg):
         """创建thinpool"""
         cmd = f"lvcreate -T -L {size} {vg}/{name} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in createing Thinpool: {name}", 0)
             return True
@@ -171,13 +173,19 @@ class ClusterLVM(object):
 
     def create_thinpool_by_free_vg(self, name, vg):
         """使用当前VG的全部剩余空间创建thinpool"""
-        create_cmd = f'lvcreate -l +100%free --thinpool {name} {vg} -y'
-        utils.exec_cmd(create_cmd, self.conn)
+        cmd = f'lvcreate -l +100%free --thinpool {name} {vg} -y'
+        result = utils.exec_cmd(cmd, )
+        if result["st"]:
+            s.prt_log(f"Success in createing Thinpool: {name}", 0)
+            return True
+        else:
+            s.prt_log(f"Failed to create Thinpool {name}", 1)
+            return False
 
     def create_thinlv(self, name, size, vg, thinpool):
         """创建thinlv"""
         cmd = f"lvcreate -V {size} -n {name} {vg}/{thinpool} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in createing Thin LV: {name}", 0)
             return True
@@ -188,7 +196,7 @@ class ClusterLVM(object):
     def del_pv(self, name):
         """删除PV"""
         cmd = f"pvremove {name} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in deleting PV: {name}", 0)
             return True
@@ -204,7 +212,7 @@ class ClusterLVM(object):
                 if int(vg[2]) > 0:
                     s.prt_log(f"{name} still have other lv resource. Cancel delete {name}.", 2)
         cmd = f"vgremove {name} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in deleting VG: {name}", 0)
             return True
@@ -216,7 +224,7 @@ class ClusterLVM(object):
         """删除thinpool"""
         # lvremove /dev/linstor_vtel_pool/vtel_pool
         cmd = f"lvremove /dev/{vg}/{thinpool} -y"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result["st"]:
             s.prt_log(f"Success in deleting Thinpool: {vg}/{thinpool}", 0)
             return True
@@ -292,7 +300,7 @@ class ClusterLVM(object):
     def get_vg_free_pe(self, vg):
         """获取vg中剩余的PE个数"""
         cmd = f"vgdisplay {vg}"
-        result = utils.exec_cmd(cmd, self.conn)
+        result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
                 re_free_pe = re.search(r'Free\s*PE / Size\s*(\d+)', result["rt"])

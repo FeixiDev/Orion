@@ -6,17 +6,17 @@ from consts import ExitCode
 class usage():
     # node部分使用手册
     node = '''
-    node(n) {create(c)/modify(m)/delete(d)/show(s)}'''
+    node(n) {create(c)/delete(d)/show(s)}'''
 
     node_create = '''
-    node(n) create(c) NODE -ip IP -nt NODETYPE'''
+    node(n) create(c) NODE -ip IP [-nt NODETYPE]'''
 
     node_delete = '''
     node(n) delete(d) NODE'''
 
     # 待完善
-    node_modify = '''
-    node(n) modify(m) NODE [-ip IP] [-nt NODETYPE]'''
+    #node_modify = '''
+    #node(n) modify(m) NODE [-ip IP] [-nt NODETYPE]'''
 
     node_show = '''
     node(n) show(s) [NODE]'''
@@ -65,21 +65,21 @@ class NodeCommands():
             '-nt',
             dest='nodetype',
             action='store',
-            help='node type: {Controller,Auxiliary,Combined,Satellite}',
-            required=True)
+            help='node type: {Controller,Satellite,Combined};the default value is Combined',
+            default='Combined')
 
         p_create_node.set_defaults(func=self.create)
 
         """
         Modify LINSTOR Node
         """
-        p_modify_node = node_subp.add_parser(
-            'modify',
-            aliases='m',
-            help='Modify the node',
-            usage=usage.node_create)
+        #p_modify_node = node_subp.add_parser(
+        #    'modify',
+        #    aliases='m',
+        #    help='Modify the node',
+        #    usage=usage.node_create)
 
-        p_modify_node.set_defaults(func=self.modify)
+        #p_modify_node.set_defaults(func=self.modify)
 
         """
         Delete LINSTOR Node
@@ -166,7 +166,8 @@ class NodeCommands():
 
     @sd.deco_record_exception
     def modify(self, args):
-        pass
+        print("This feature is not yet developed")
+
 
     def print_node_help(self, *args):
         self.node_parser.print_help()
