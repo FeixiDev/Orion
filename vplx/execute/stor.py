@@ -81,13 +81,11 @@ class Node():
         cmd = f'linstor node create {node} {ip}  --node-type {nt}'
         nt_value = [
             'Combined',
-            'combined',
             'Controller',
-            'Auxiliary',
             'Satellite']
         if nt not in nt_value:
             print('node type error,choose from ''Combined',
-                  'Controller', 'Auxiliary', 'Satellite''')
+                  'Controller', 'Satellite''')
         else:
             result = execute_linstor_cmd(cmd)
             if result['sts'] == 0:
