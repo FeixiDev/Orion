@@ -6,7 +6,7 @@ from consts import ExitCode
 class usage():
     # node部分使用手册
     node = '''
-    node(n) {create(c)/modify(m)/delete(d)/show(s)}'''
+    node(n) {create(c)/delete(d)/show(s)}'''
 
     node_create = '''
     node(n) create(c) NODE -ip IP [-nt NODETYPE]'''
@@ -15,8 +15,8 @@ class usage():
     node(n) delete(d) NODE'''
 
     # 待完善
-    node_modify = '''
-    node(n) modify(m) NODE [-ip IP] [-nt NODETYPE]'''
+    #node_modify = '''
+    #node(n) modify(m) NODE [-ip IP] [-nt NODETYPE]'''
 
     node_show = '''
     node(n) show(s) [NODE]'''
@@ -65,7 +65,7 @@ class NodeCommands():
             '-nt',
             dest='nodetype',
             action='store',
-            help='node type: {Controller,Satellite,Combined}',
+            help='node type: {Controller,Satellite,Combined};the default value is Combined',
             default='Combined')
 
         p_create_node.set_defaults(func=self.create)
