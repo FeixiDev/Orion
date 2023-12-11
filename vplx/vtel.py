@@ -105,7 +105,7 @@ class VtelCLI(object):
 
         parser_stor = subp.add_parser(
             'stor',
-            help='Management operations for LINSTOR',
+            help='Management operations for VersaSDS',
             add_help=True,
             formatter_class=argparse.RawTextHelpFormatter,
         )

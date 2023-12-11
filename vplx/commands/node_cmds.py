@@ -65,7 +65,7 @@ class NodeCommands():
             '-nt',
             dest='nodetype',
             action='store',
-            help='node type: {Controller,Satellite,Combined};the default value is Combined',
+            help='node type: {Controller,Satellite,Combined}; the default value is Combined',
             default='Combined')
 
         p_create_node.set_defaults(func=self.create)
