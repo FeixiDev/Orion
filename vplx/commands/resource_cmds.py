@@ -300,11 +300,14 @@ class ResourceCommands():
     @sd.deco_record_exception
     @sd.deco_comfirm_del('resource')
     def delete(self, args):
-        res = ex.Resource()
-        if args.node:
-            res.delete_resource_des(args.node, args.resource)
-        elif not args.node:
-            res.delete_resource_all(args.resource)
+        try:
+            res = ex.Resource()
+            if args.node:
+                res.delete_resource_des(args.node, args.resource)
+            elif not args.node:
+                res.delete_resource_all(args.resource)
+        except TypeError as e:
+            print("controller 连接失败，请检查")
 
     @sd.deco_record_exception
     def show(self, args):
