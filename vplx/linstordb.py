@@ -320,7 +320,9 @@ class CollectData(LinstorDB):
             self.select(['resourcetb'], 'Resource', 'StoragePool', 'Allocated', 'DeviceName', 'InUse', 'State',
                         Node=node))
         for res_data_one in res_data:
-            date_list.append(list(res_data_one))
+            if None not in res_data_one:
+                date_list.append(list(res_data_one))
+            # date_list.append(list(res_data_one))
         return date_list
 
     def get_sp_in_node(self, node):
@@ -418,7 +420,11 @@ class CollectData(LinstorDB):
         res_data = self.select(['resourcetb'], 'Resource', 'Allocated', 'DeviceName', 'InUse', 'State', StoragePool=sp)
         for res in res_data:
             res_name, size, device_name, used, status = res
-            list_one = [res_name, size, device_name, used, status]
+            list_one = [res_name if res_name is not None else '',
+                        size if size is not None else '',
+                        device_name if device_name is not None else '',
+                        used if used is not None else '',
+                        status if status is not None else '']
             date_list.append(list_one)
         self.cur.close()
         return date_list
