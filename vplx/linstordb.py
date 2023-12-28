@@ -276,18 +276,21 @@ class CollectData(LinstorDB):
         res_used = []
         result = []
 
-        res_all = self.fet_all(self.select_all(['resourcetb'], 'DISTINCT Resource', 'Allocated', 'DeviceName', 'InUse'))
+        res_all = self.fet_all(self.select_all(['resourcetb'], 'DISTINCT Resource', 'Allocated', 'DeviceName', 'InUse', 'State'))
         in_use = self.fet_all(
             self.select(['resourcetb'], 'DISTINCT Resource', 'Allocated', 'DeviceName', 'InUse', InUse='InUse'))
 
         for i in in_use:
             res_used.append(i[0])
 
+        res_all = [(a, b, c, d, e if e is not None else 'unknow') for a, b, c, d, e in res_all]
+
         for res in res_all:
-            if res[3] == 'InUse':
+            if res[3] == 'InUse' or res[3] == "":
                 result.append(res)
             if res[0] not in res_used and res[3] == 'Unused':
                 result.append(res)
+
         return result
 
     def get_all_node(self):
@@ -350,14 +353,19 @@ class CollectData(LinstorDB):
 
     def get_all_res(self):
         data_list = []
+        unknown_state_resources = []
+        processed_resources = set()
         for i in self._get_resource():
-            if i[1]:  # 过滤size为空的resource
-                resource, size, device_name, used = i
+            resource, size, device_name, used, state = i
+            if state == 'unknow':  # Check if the state is 'unknow'
+                unknown_state_resources.append(f'* the resource status of "{resource}" is abnormal. Please use the command "stor r s {resource}" to view detalied information.')
+            if resource not in processed_resources:
                 mirror_way = self.select_count(['resourcetb'], 'Resource', Resource=resource)
                 list_one = [resource, mirror_way, size, device_name, used]
                 data_list.append(list_one)
+                processed_resources.add(resource)
         self.cur.close()
-        return data_list
+        return data_list, unknown_state_resources
 
     # 置顶文字
     def get_res_info(self, resource):
@@ -365,7 +373,7 @@ class CollectData(LinstorDB):
         for i in self._get_resource():
             if i[0] == resource:
                 if i[1]:
-                    resource, size, device_name, used = i
+                    resource, size, device_name, used, state = i
                     mirror_way = self.select_count(['resourcetb'], 'Resource', Resource=resource)
                     list_one = [resource, mirror_way, size, device_name, used]
         return tuple(list_one)

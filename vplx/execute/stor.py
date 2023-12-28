@@ -467,13 +467,16 @@ class Resource():
 
     def show_all_res(self,no_color='no'):
         collecter = linstordb.CollectData()
+        data_list, unknown_state_resources = collecter.get_all_res()
         if no_color == 'no':
             data = s.deco_color(collecter.get_all_res)()
         else:
-            data = collecter.get_all_res()
+            data = data_list
         header = ["resource", "mirror_way", "size", "device_name", "used"]
-        table = s.make_table(header,data)
+        table = s.make_table(header,data[0])
         s.prt_log(table,0)
+        for i in unknown_state_resources:
+            print(i)
 
 
     def show_one_res(self,res,no_color='no'):
