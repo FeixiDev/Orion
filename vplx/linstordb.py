@@ -283,7 +283,7 @@ class CollectData(LinstorDB):
         for i in in_use:
             res_used.append(i[0])
 
-        res_all = [(a, b, c, d, e if e is not None else 'unknow') for a, b, c, d, e in res_all]
+        res_all = [(a, b, c, d, e if e is not None else 'unknown') for a, b, c, d, e in res_all]
 
         for res in res_all:
             if res[3] == 'InUse' or res[3] == "":
@@ -357,7 +357,7 @@ class CollectData(LinstorDB):
         processed_resources = set()
         for i in self._get_resource():
             resource, size, device_name, used, state = i
-            if state == 'unknow':  # Check if the state is 'unknow'
+            if state == 'unknown':  # Check if the state is 'unknown'
                 unknown_state_resources.append(f'* the resource status of "{resource}" is abnormal. Please use the command "stor r s {resource}" to view detalied information.')
             if resource not in processed_resources:
                 mirror_way = self.select_count(['resourcetb'], 'Resource', Resource=resource)
@@ -381,6 +381,7 @@ class CollectData(LinstorDB):
     def get_one_res(self, resource):
         data_list = []
         res_data = self.fet_all(self.select(['resourcetb'], 'Node', 'StoragePool', 'InUse', 'State', Resource=resource))
+        res_data = [(a, b, c, d if d is not None else 'unknown') for a, b, c, d in res_data]
         for res_one in res_data:
             node_name, sp_name, drbd_role, status = list(res_one)
             if drbd_role == u'InUse':
