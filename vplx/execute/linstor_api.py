@@ -201,7 +201,7 @@ class LinstorAPI():
         except:
             print("* linstor-client.conf failed to open, Please check if this file exists.")
             print("* Use the localhost IP to use as the controller IP")
-            contrl_list = [socket.gethostname()]
+            contrl_list = socket.gethostname()
         servers = linstor.MultiLinstor.controller_uri_list(contrl_list)
         if 'parsed_args' in kwargs:
             cliargs = kwargs['parsed_args']
