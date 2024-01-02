@@ -200,26 +200,23 @@ class LinstorAPI():
                 contrl_list = re.findall('controllers=(.*)',data)[0]
         except:
             print("* linstor-client.conf failed to open, Please check if this file exists.")
-            print("* Use the localhost IP to use as the controller IP")
+            print("* Use the localhost IP as the controller IP")
             contrl_list = socket.gethostname()
-        try:
-            servers = linstor.MultiLinstor.controller_uri_list(contrl_list)
-            if 'parsed_args' in kwargs:
-                cliargs = kwargs['parsed_args']
-                servers = linstor.MultiLinstor.controller_uri_list(cliargs.controllers)
-            if not servers:
-                return None
+        servers = linstor.MultiLinstor.controller_uri_list(contrl_list)
+        if 'parsed_args' in kwargs:
+            cliargs = kwargs['parsed_args']
+            servers = linstor.MultiLinstor.controller_uri_list(cliargs.controllers)
+        if not servers:
+            return None
 
-            for server in servers:
-                try:
-                    self._linstor_completer = linstor.Linstor(server)
-                    self._linstor_completer.connect()
-                    break
-                except linstor.LinstorNetworkError as le:
-                    pass
-        except Exception as e :
-            print(f"错误:{e}")
-
+        for server in servers:
+            try:
+                self._linstor_completer = linstor.Linstor(server)
+                self._linstor_completer.connect()
+                break
+            except linstor.LinstorNetworkError as le:
+                print("Unable to connect to this controller API")
+                sys.exit()
         return self._linstor_completer
 
 
