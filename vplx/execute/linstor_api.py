@@ -215,7 +215,7 @@ class LinstorAPI():
                 self._linstor_completer.connect()
                 break
             except linstor.LinstorNetworkError as le:
-                print("Unable to connect to this controller API")
+                print("Unable to connect to this controller IP")
                 sys.exit()
         return self._linstor_completer
 
