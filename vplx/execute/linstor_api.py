@@ -2,6 +2,7 @@ import sys
 import json
 import re
 import time
+import socket
 
 try:
     import linstor
@@ -193,9 +194,14 @@ class LinstorAPI():
 
         # TODO also read config overrides
         # servers = ['linstor://localhost']
-        with open(LinstorAPI.LINSTOR_CONF) as f:
-            data = f.read()
-            contrl_list = re.findall('controllers=(.*)',data)[0]
+        try:
+            with open(LinstorAPI.LINSTOR_CONF) as f:
+                data = f.read()
+                contrl_list = re.findall('controllers=(.*)',data)[0]
+        except:
+            print("* linstor-client.conf failed to open, Please check if this file exists.")
+            print("* Use the localhost IP to use as the controller IP")
+            contrl_list = [socket.gethostname()]
         servers = linstor.MultiLinstor.controller_uri_list(contrl_list)
         if 'parsed_args' in kwargs:
             cliargs = kwargs['parsed_args']
