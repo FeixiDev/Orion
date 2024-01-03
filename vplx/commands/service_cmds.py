@@ -89,20 +89,17 @@ class ServiceCommands():
 
     @sd.deco_record_exception
     def eviction_stop(self, args):
-        print("this is eviction_stop")
         service_operation = se.ServiceOperation()
         service_operation.eviction_stop()
 
 
     @sd.deco_record_exception
     def controller_start(self, args):
-        print("this is controller_start")
         service_operation = se.ServiceOperation()
         service_operation.controller_start()
 
     @sd.deco_record_exception
     def controller_stop(self, args):
-        print("this is controller_stop")
         service_operation = se.ServiceOperation()
         service_operation.controller_stop()
 
