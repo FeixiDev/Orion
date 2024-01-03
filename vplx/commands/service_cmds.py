@@ -1,23 +1,24 @@
 import execute as ex
 import sundry as sd
+import execute.service as se
 
 
 class Usage():
     # host部分使用手册
     eviction = '''
-    eviction(e) {stop(st)}'''
+    eviction(e) {stop}'''
 
     eviction_stop = '''
-    eviction(e) stop(st)'''
+    eviction(e) stop'''
 
     controller = ''''
-    controller(c) {start(st)/stop(sp)}'''
+    controller(c) {start/stop}'''
 
     controller_start = '''
-    controller(c) start(st)'''
+    controller(c) start'''
 
     controller_stop = '''
-    controller(c) stop(sp)'''
+    controller(c) stop'''
 
 class ServiceCommands():
     def __init__(self):
@@ -41,7 +42,6 @@ class ServiceCommands():
 
         p_eviction_stop = eviction_subp.add_parser(
             'stop',
-            aliases='sp',
             help='Stop the eviction service',
             usage=Usage.eviction_stop)
         self.p_eviction_stop = p_eviction_stop
@@ -65,7 +65,6 @@ class ServiceCommands():
 
         p_controller_start = controller_subp.add_parser(
             'start',
-            aliases='st',
             help='Start the controller service',
             usage=Usage.controller_start)
         self.p_controller_start = p_controller_start
@@ -78,7 +77,6 @@ class ServiceCommands():
 
         p_controller_stop = controller_subp.add_parser(
             'stop',
-            aliases='sp',
             help='Stop the controller service',
             usage=Usage.controller_stop)
         self.p_controller_stop = p_controller_stop
@@ -92,14 +90,21 @@ class ServiceCommands():
     @sd.deco_record_exception
     def eviction_stop(self, args):
         print("this is eviction_stop")
+        service_operation = se.ServiceOperation()
+        service_operation.eviction_stop()
+
 
     @sd.deco_record_exception
     def controller_start(self, args):
         print("this is controller_start")
+        service_operation = se.ServiceOperation()
+        service_operation.controller_start()
 
     @sd.deco_record_exception
     def controller_stop(self, args):
         print("this is controller_stop")
+        service_operation = se.ServiceOperation()
+        service_operation.controller_start()
 
 
     def print_eviction_help(self, *args):
