@@ -126,10 +126,12 @@ class VtelCLI(object):
         #     help='Management operations for iSCSI')
 
         self.parser_stor = parser_stor
+        self.parser_service = parser_service
         # #注释掉iscsi功能
         # self.parser_iscsi = parser_iscsi
 
         subp_stor = parser_stor.add_subparsers(dest='subargs_stor',metavar='')
+        subp_service = parser_service.add_subparsers(dest='subargs_service',metavar='')
         # #注释掉iscsi功能
         # subp_iscsi = parser_iscsi.add_subparsers(dest='subargs_iscsi',metavar='')
 
@@ -144,8 +146,8 @@ class VtelCLI(object):
 
         # add all subcommands and argument
         self._replay_commands.setup_commands(subp)
-        self._service_commands.setup_commands(subp)
 
+        self._service_commands.setup_commands(subp_service)
         self._lvm_commands.setup_commands(subp_stor)
         self._node_commands.setup_commands(subp_stor)
         self._resource_commands.setup_commands(subp_stor)
