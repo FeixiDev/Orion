@@ -11,9 +11,9 @@ class ServiceOperation(object):
         result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
-                print("auto-eviction stops successfully")
+                print("auto-eviction stop successfully")
             else:
-                print("auto-eviction stops failing")
+                print("auto-eviction stop failing")
 
     def controller_start(self):
         """开启linstor controller服务"""
@@ -21,9 +21,9 @@ class ServiceOperation(object):
         result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
-                print("linstor controller starts successfully")
+                print("linstor controller start successfully")
             else:
-                print("linstor controller starts failing")
+                print("linstor controller start failing")
 
     def controller_stop(self):
         """关闭linstor controller服务"""
@@ -31,6 +31,6 @@ class ServiceOperation(object):
         result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
-                print("linstor controller stops successfully")
+                print("linstor controller stop successfully")
             else:
-                print("linstor controller stops failing")
+                print("linstor controller stop failing")
