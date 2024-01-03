@@ -5,4 +5,4 @@ from .linstor_api import LinstorAPI
 from .lvm import LVM
 from .stor import Node,Resource,StoragePool
 from .iscsi import Disk,DiskGroup,Host,HostGroup,Map,Portal,Target,LogicalUnit
-
+from .service import ServiceOperation
