@@ -21,9 +21,9 @@ class ServiceOperation(object):
         result = utils.exec_cmd(cmd, )
         if result:
             if result["st"]:
-                print("linstor controller stops successfully")
+                print("linstor controller starts successfully")
             else:
-                print("linstor controller stops failing")
+                print("linstor controller starts failing")
 
     def controller_stop(self):
         """关闭linstor controller服务"""

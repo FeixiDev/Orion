@@ -104,7 +104,7 @@ class ServiceCommands():
     def controller_stop(self, args):
         print("this is controller_stop")
         service_operation = se.ServiceOperation()
-        service_operation.controller_start()
+        service_operation.controller_stop()
 
 
     def print_eviction_help(self, *args):
