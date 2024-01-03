@@ -215,8 +215,12 @@ class LinstorAPI():
                 self._linstor_completer.connect()
                 break
             except linstor.LinstorNetworkError as le:
-                print(f"Unable to connect to this controller IP: {contrl_list}")
-                sys.exit()
+                pass
+                # print(f"Unable to connect to this controller IP: {contrl_list}")
+                # sys.exit()
+        else:
+            print(f"Unable to connect to any server in the list: {contrl_list}")
+            sys.exit()
         return self._linstor_completer
 
 
