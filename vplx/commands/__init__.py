@@ -14,3 +14,5 @@ from .portal_cmds import PortalCommands
 from .sync_cmds import SyncCommands
 from .target_cmds import TargetCommands
 from .logicalunit_cmds import LogicalUnitCommands
+
+from .service_cmds import ServiceCommands

@@ -20,7 +20,9 @@ from commands import (
     PortalCommands,
     TargetCommands,
     LogicalUnitCommands,
-    SyncCommands
+    SyncCommands,
+    ServiceCommands,
+
 )
 
 
@@ -73,6 +75,7 @@ class VtelCLI(object):
         self._target_commands = TargetCommands()
         self._logicalunit_commands = LogicalUnitCommands()
         self._sync_commands = SyncCommands()
+        self._service_commands = ServiceCommands()
         self._replay_commands = ReplayCommands(self.parser)
         self.setup_parser()
 
@@ -110,6 +113,13 @@ class VtelCLI(object):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
+        parser_service = subp.add_parser(
+            'service',
+            help='Service for VersaSDS',
+            add_help=True,
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
+
         ##注释掉iscsi功能
         # parser_iscsi = subp.add_parser(
         #     'iscsi',
@@ -134,6 +144,7 @@ class VtelCLI(object):
 
         # add all subcommands and argument
         self._replay_commands.setup_commands(subp)
+        self._service_commands.setup_commands(subp)
 
         self._lvm_commands.setup_commands(subp_stor)
         self._node_commands.setup_commands(subp_stor)
@@ -154,6 +165,7 @@ class VtelCLI(object):
         #
         # parser_iscsi.set_defaults(func=self.print_iscsi_help)
         parser_stor.set_defaults(func=self.print_stor_help)
+        parser_service.set_defaults(func=self.print_service_help)
         self.parser.set_defaults(func=self.func_vtel)
 
 
@@ -168,6 +180,9 @@ class VtelCLI(object):
 
     def print_stor_help(self, *args):
         self.parser_stor.print_help()
+
+    def print_service_help(self, *args):
+        self.parser_service.print_help()
 
 
     def parse(self): # 调用入口
