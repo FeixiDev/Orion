@@ -298,7 +298,11 @@ def deco_color(func):
     def wrapper(*args):
         status_true = ['UpToDate', 'Online','ONLINE', 'Ok', 'InUse']
         data = func(*args)
-        for lst in data:
+        if isinstance(data, tuple):
+            data_to_color = data[0]
+        else:
+            data_to_color = data
+        for lst in data_to_color:
             if lst[-1] in status_true:
                 lst[-1] = ca.Fore.GREEN + lst[-1] + ca.Style.RESET_ALL
             else:
