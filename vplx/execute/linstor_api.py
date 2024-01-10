@@ -112,6 +112,7 @@ class LinstorAPI():
         # self._linstor = None
         self._linstor_completer = None
         self.get_linstorapi()
+        self.flag_linstorapi = True
 
     @classmethod
     def parse_size_str(cls, size_str, default_unit="GiB"):
@@ -223,7 +224,7 @@ class LinstorAPI():
                 # sys.exit()
         else:
             print(f"Unable to connect to any server in the list: {contrl_list}")
-            sys.exit()
+            self.flag_linstorapi = False
         return self._linstor_completer
 
 

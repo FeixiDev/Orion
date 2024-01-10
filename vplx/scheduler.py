@@ -1,3 +1,5 @@
+import sys
+
 import gevent
 from gevent import monkey
 
@@ -19,6 +21,8 @@ class Scheduler():
 
     def get_linstor_data(self):
         linstor_api = LinstorAPI()
+        if not linstor_api.flag_linstorapi:
+            sys.exit()
         node_data = gevent.spawn(linstor_api.get_node)
         res_data = gevent.spawn(linstor_api.get_resource)
         sp_data = gevent.spawn(linstor_api.get_storagepool)
