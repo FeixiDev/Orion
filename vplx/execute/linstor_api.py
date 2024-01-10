@@ -111,8 +111,8 @@ class LinstorAPI():
     def __init__(self):
         # self._linstor = None
         self._linstor_completer = None
-        self.get_linstorapi()
         self.flag_linstorapi = True
+        self.get_linstorapi()
 
     @classmethod
     def parse_size_str(cls, size_str, default_unit="GiB"):
