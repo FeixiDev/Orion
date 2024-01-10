@@ -230,6 +230,8 @@ class LinstorAPI():
 
 
     def get_node(self,node=None):
+        if self._linstor_completer is None:
+            sys.exit()
         msg = self._linstor_completer.node_list(node)[0]
         time.sleep(0)
         lst = []
@@ -255,6 +257,8 @@ class LinstorAPI():
         :param sp: list,用于过滤
         :return:
         """
+        if self._linstor_completer is None:
+            sys.exit()
         msg = self._linstor_completer.storage_pool_list(node,sp)[0]
         time.sleep(0)
         lst = []
@@ -292,6 +296,8 @@ class LinstorAPI():
 
 
     def get_resource(self,node=None,storagepool=None,resource=None):
+        if self._linstor_completer is None:
+            sys.exit()
         msg = self._linstor_completer.volume_list(node,storagepool,resource)[0]
         time.sleep(0)
         lst = []
