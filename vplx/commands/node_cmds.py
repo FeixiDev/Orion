@@ -131,19 +131,25 @@ class NodeCommands():
 
     @sd.deco_record_exception
     def create(self, args):
-        node = ex.Node()
-        if args.node and args.nodetype and args.ip:
-            node.create_node(args.node, args.ip, args.nodetype)
-            return ExitCode.OK
-        else:
-            self.p_create_node.print_help()
-            return ExitCode.ARGPARSE_ERROR
+        try:
+            node = ex.Node()
+            if args.node and args.nodetype and args.ip:
+                node.create_node(args.node, args.ip, args.nodetype)
+                return ExitCode.OK
+            else:
+                self.p_create_node.print_help()
+                return ExitCode.ARGPARSE_ERROR
+        except TypeError as e:
+            print("controller 连接失败，请检查")
 
     @sd.deco_record_exception
     @sd.deco_comfirm_del('node')
     def delete(self, args):
-        node = ex.Node()
-        node.delete_node(args.node)
+        try:
+            node = ex.Node()
+            node.delete_node(args.node)
+        except TypeError as e:
+            print("controller 连接失败，请检查")
 
     @sd.deco_record_exception
     def show(self, args):

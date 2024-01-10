@@ -136,20 +136,23 @@ class StoragePoolCommands():
 
     @sd.deco_record_exception
     def create(self, args):
-        sp = ex.StoragePool()
-        if args.storagepool and args.node:
-            # The judgment of the lvm module to create a storage pool
-            if args.lvm:
-                    sp.create_storagepool_lvm(
-                        args.node, args.storagepool, args.lvm)
-            # The judgment of the thin-lv module to create a storage pool
-            elif args.tlv:
-                sp.create_storagepool_thinlv(
-                    args.node, args.storagepool, args.tlv)
+        try:
+            sp = ex.StoragePool()
+            if args.storagepool and args.node:
+                # The judgment of the lvm module to create a storage pool
+                if args.lvm:
+                        sp.create_storagepool_lvm(
+                            args.node, args.storagepool, args.lvm)
+                # The judgment of the thin-lv module to create a storage pool
+                elif args.tlv:
+                    sp.create_storagepool_thinlv(
+                        args.node, args.storagepool, args.tlv)
+                else:
+                    self.p_create_sp.print_help()
             else:
                 self.p_create_sp.print_help()
-        else:
-            self.p_create_sp.print_help()
+        except TypeError as e:
+            print("controller 连接失败，请检查")
 
     def modify(self):
         pass
@@ -157,8 +160,11 @@ class StoragePoolCommands():
     @sd.deco_record_exception
     @sd.deco_comfirm_del('storage pool')
     def delete(self, args):
-        sp = ex.StoragePool()
-        sp.delete_storagepool(args.node, args.storagepool)
+        try:
+            sp = ex.StoragePool()
+            sp.delete_storagepool(args.node, args.storagepool)
+        except TypeError as e:
+            print("controller 连接失败，请检查")
 
     @sd.deco_record_exception
     def show(self, args):
