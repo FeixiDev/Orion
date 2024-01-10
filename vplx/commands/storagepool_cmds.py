@@ -152,7 +152,7 @@ class StoragePoolCommands():
             else:
                 self.p_create_sp.print_help()
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     def modify(self):
         pass
@@ -164,7 +164,7 @@ class StoragePoolCommands():
             sp = ex.StoragePool()
             sp.delete_storagepool(args.node, args.storagepool)
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     def show(self, args):

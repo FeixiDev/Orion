@@ -298,7 +298,7 @@ class ResourceCommands():
             else:
                 self.p_create_res.print_help()
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     @sd.deco_comfirm_del('resource')
@@ -310,7 +310,7 @@ class ResourceCommands():
             elif not args.node:
                 res.delete_resource_all(args.resource)
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     def show(self, args):

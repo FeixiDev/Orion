@@ -140,7 +140,7 @@ class NodeCommands():
                 self.p_create_node.print_help()
                 return ExitCode.ARGPARSE_ERROR
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     @sd.deco_comfirm_del('node')
@@ -149,7 +149,7 @@ class NodeCommands():
             node = ex.Node()
             node.delete_node(args.node)
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     def show(self, args):
