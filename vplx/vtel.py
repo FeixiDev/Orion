@@ -145,7 +145,7 @@ class VtelCLI(object):
 
 
         # add all subcommands and argument
-        self._replay_commands.setup_commands(subp)
+        # self._replay_commands.setup_commands(subp)
 
         self._service_commands.setup_commands(subp_service)
         self._lvm_commands.setup_commands(subp_stor)

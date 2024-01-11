@@ -111,6 +111,7 @@ class LinstorAPI():
     def __init__(self):
         # self._linstor = None
         self._linstor_completer = None
+        self.flag_linstorapi = True
         self.get_linstorapi()
 
     @classmethod
@@ -217,18 +218,20 @@ class LinstorAPI():
                 self._linstor_completer = linstor.Linstor(server)
                 self._linstor_completer.connect()
                 break
-            except linstor.LinstorNetworkError as le:
-                pass
-                # print(f"Unable to connect to this controller IP: {contrl_list}")
-                # sys.exit()
-        else:
+            except Exception:
+                self._linstor_completer = None
+
+        if self._linstor_completer is None:
             print(f"Unable to connect to any server in the list: {contrl_list}")
-            sys.exit()
+            self.flag_linstorapi = False
+
         return self._linstor_completer
 
 
 
     def get_node(self,node=None):
+        if self._linstor_completer is None:
+            sys.exit()
         msg = self._linstor_completer.node_list(node)[0]
         time.sleep(0)
         lst = []
@@ -254,6 +257,8 @@ class LinstorAPI():
         :param sp: list,用于过滤
         :return:
         """
+        if self._linstor_completer is None:
+            sys.exit()
         msg = self._linstor_completer.storage_pool_list(node,sp)[0]
         time.sleep(0)
         lst = []
@@ -291,6 +296,8 @@ class LinstorAPI():
 
 
     def get_resource(self,node=None,storagepool=None,resource=None):
+        if self._linstor_completer is None:
+            sys.exit()
         msg = self._linstor_completer.volume_list(node,storagepool,resource)[0]
         time.sleep(0)
         lst = []

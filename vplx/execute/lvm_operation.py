@@ -32,11 +32,22 @@ def size_conversion(size_str):
 
 class ClusterLVM(object):
     def __init__(self, node):
-        try:
-            self.api = LinstorAPI()
-            self.sp = self.api.get_storagepool([node])
-            self.res = self.api.get_resource([node])
-        except AttributeError:
+        # try:
+        #     self.api = LinstorAPI()
+        #     self.sp = self.api.get_storagepool([node])
+        #     self.res = self.api.get_resource([node])
+        # except AttributeError:
+        #     self.sp = None
+        #     self.res = None
+        self.api = LinstorAPI()
+        if self.api.flag_linstorapi:
+            try:
+                self.sp = self.api.get_storagepool([node])
+                self.res = self.api.get_resource([node])
+            except AttributeError:
+                self.sp = None
+                self.res = None
+        else:
             self.sp = None
             self.res = None
 

@@ -165,8 +165,8 @@ class LVMCommands():
     @sd.deco_record_exception
     def show(self, args):
 
-        node_list = []
-        api = ex.linstor_api.LinstorAPI()
+        # node_list = []
+        # api = ex.linstor_api.LinstorAPI()
         # #删除指定节点展示功能
         # if args.node:
         #     node_list.append(args.node)

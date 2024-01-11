@@ -212,90 +212,93 @@ class ResourceCommands():
 
         :param args: Namespace that has been parsed for CLI
         """
-        res = ex.Resource()
+        try:
+            res = ex.Resource()
 
-        """对应创建模式必需输入的参数和禁止输入的参数"""
-        # Parameters required for automatic resource creation
-        list_auto_required = [args.auto, args.num]
-        # Automatically create input parameters for resource prohibition
-        list_auto_forbid = [
-            args.node,
-            args.storagepool,
-            args.diskless,
-            args.add_mirror]
-        # Specify the node and storage pool to create resources require input
-        # parameters
-        list_manual_required = [args.node, args.storagepool]
-        # Specify the input parameters for node and storage pool creation
-        # resource prohibition
-        list_manual_forbid = [
-            args.auto,
-            args.num,
-            args.diskless,
-            args.add_mirror]
-        # Create diskless resource prohibited input parameters
-        list_diskless_forbid = [
-            args.auto,
-            args.num,
-            args.storagepool,
-            args.add_mirror]
+            """对应创建模式必需输入的参数和禁止输入的参数"""
+            # Parameters required for automatic resource creation
+            list_auto_required = [args.auto, args.num]
+            # Automatically create input parameters for resource prohibition
+            list_auto_forbid = [
+                args.node,
+                args.storagepool,
+                args.diskless,
+                args.add_mirror]
+            # Specify the node and storage pool to create resources require input
+            # parameters
+            list_manual_required = [args.node, args.storagepool]
+            # Specify the input parameters for node and storage pool creation
+            # resource prohibition
+            list_manual_forbid = [
+                args.auto,
+                args.num,
+                args.diskless,
+                args.add_mirror]
+            # Create diskless resource prohibited input parameters
+            list_diskless_forbid = [
+                args.auto,
+                args.num,
+                args.storagepool,
+                args.add_mirror]
 
-        if args.size:
-            # judge size
-            try:
-                self.is_vail_size(args.size)
-            except InvalidSizeError:
-                print('%s is not a valid size!' % args.size)
-                sys.exit()
-            # 自动创建条件判断，符合则执行
-            if all(list_auto_required) and not any(list_auto_forbid):
-                res.create_res_auto(args.resource, args.size, args.num)
-            # 手动创建条件判断，符合则执行
-            elif all(list_manual_required) and not any(list_manual_forbid):
+            if args.size:
+                # judge size
                 try:
-                    self.is_args_correct(args.node, args.storagepool)
-                except NodeAndSPNumError:
-                    print('The number of nodes does not meet the requirements')
-                    self.logger.write_to_log(
-                        'DATA', 'debug', 'exception', '', str(traceback.format_exc()))
+                    self.is_vail_size(args.size)
+                except InvalidSizeError:
+                    print('%s is not a valid size!' % args.size)
                     sys.exit()
+                # 自动创建条件判断，符合则执行
+                if all(list_auto_required) and not any(list_auto_forbid):
+                    res.create_res_auto(args.resource, args.size, args.num)
+                # 手动创建条件判断，符合则执行
+                elif all(list_manual_required) and not any(list_manual_forbid):
+                    try:
+                        self.is_args_correct(args.node, args.storagepool)
+                    except NodeAndSPNumError:
+                        print('The number of nodes does not meet the requirements')
+                        self.logger.write_to_log(
+                            'DATA', 'debug', 'exception', '', str(traceback.format_exc()))
+                        sys.exit()
+                    else:
+                        res.create_res_manual(
+                            args.resource, args.size, args.node, args.storagepool)
                 else:
-                    res.create_res_manual(
-                        args.resource, args.size, args.node, args.storagepool)
-            else:
-                # self.logger.add_log(username, 'cli_user_input', transaction_id, path, 'ARGPARSE_ERROR', cmd)
-                self.p_create_res.print_help()
+                    # self.logger.add_log(username, 'cli_user_input', transaction_id, path, 'ARGPARSE_ERROR', cmd)
+                    self.p_create_res.print_help()
 
-        elif args.diskless:
-            # 创建resource的diskless资源条件判断，符合则执行
-            if args.node and not any(list_diskless_forbid):
-                res.create_res_diskless(args.node, args.resource)
+            elif args.diskless:
+                # 创建resource的diskless资源条件判断，符合则执行
+                if args.node and not any(list_diskless_forbid):
+                    res.create_res_diskless(args.node, args.resource)
+                else:
+                    self.p_create_res.print_help()
+
+            elif args.add_mirror:
+                # 手动添加mirror条件判断，符合则执行
+                if all([args.node, args.storagepool]) and not any(
+                        [args.auto, args.num]):
+                    try:
+                        self.is_args_correct(args.node, args.storagepool)
+                        res.add_mirror_manual(
+                            args.resource, args.node, args.storagepool)
+                    except NodeAndSPNumError:
+                        print('The number of nodes does not meet the requirements')
+                        self.logger.write_to_log(
+                            'DATA', 'debug', 'exception', '', str(traceback.format_exc()))
+                        sys.exit()
+                    # else:
+                    #     self.p_create_res.print_help()
+                # 自动添加mirror条件判断，符合则执行
+                elif all([args.auto, args.num]) and not any([args.node, args.storagepool]):
+                    res.add_mirror_auto(args.resource, args.num)
+                else:
+                    self.p_create_res.print_help()
+
             else:
                 self.p_create_res.print_help()
-
-        elif args.add_mirror:
-            # 手动添加mirror条件判断，符合则执行
-            if all([args.node, args.storagepool]) and not any(
-                    [args.auto, args.num]):
-                try:
-                    self.is_args_correct(args.node, args.storagepool)
-                    res.add_mirror_manual(
-                        args.resource, args.node, args.storagepool)
-                except NodeAndSPNumError:
-                    print('The number of nodes does not meet the requirements')
-                    self.logger.write_to_log(
-                        'DATA', 'debug', 'exception', '', str(traceback.format_exc()))
-                    sys.exit()
-                # else:
-                #     self.p_create_res.print_help()
-            # 自动添加mirror条件判断，符合则执行
-            elif all([args.auto, args.num]) and not any([args.node, args.storagepool]):
-                res.add_mirror_auto(args.resource, args.num)
-            else:
-                self.p_create_res.print_help()
-
-        else:
-            self.p_create_res.print_help()
+        except TypeError as e:
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     @sd.deco_comfirm_del('resource')
@@ -307,7 +310,7 @@ class ResourceCommands():
             elif not args.node:
                 res.delete_resource_all(args.resource)
         except TypeError as e:
-            print("controller 连接失败，请检查")
+            print("controller connection failed, please check")
 
     @sd.deco_record_exception
     def show(self, args):
