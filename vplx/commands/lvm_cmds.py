@@ -13,8 +13,8 @@ class Usage():
 
     lvm_create = '''
         lvm create(c) NAME -t vg -d DEVICE [DEVICE...]
-        lvm create(c) NAME -t thinpool -d DEVICE [DEVICE...] -s SIZE
-        lvm create(c) NAME -t thinpool -vg VG -s SIZE'''
+        lvm create(c) NAME -t thinpool -d DEVICE [DEVICE...] [-s SIZE]
+        lvm create(c) NAME -t thinpool -vg VG [-s SIZE]'''
 
     lvm_delete = '''
         lvm delete(d) NAME -t vg
@@ -61,7 +61,7 @@ class LVMCommands():
             '--size',
             dest='size',
             action='store',
-            help='Size of thinpool')
+            help='Size of thinpool. Default to using the remaining available storage space.')
         # p_create_lvm.add_argument(
         #     '-n',
         #     '--node',
